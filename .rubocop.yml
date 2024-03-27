@@ -1,0 +1,12 @@
+require:
+  - rubocop-rails
+
+Style/Documentation:
+  Enabled: false
+
+Rails/Delegate:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
