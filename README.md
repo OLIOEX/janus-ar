@@ -1,8 +1,10 @@
-# MySQL2 Split
+# Janus ActiveRecord
 
-![Build Status](https://github.com/olioex/janus-ar/workflows/ci/badge.svg)
+![Build Status](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml/badge.svg)
 
-MySQL2Split is generic primary/replica proxy for ActiveRecord 7.1+ and MySQL. It handles the switching of connections between primary and replica database servers. It comes with an ActiveRecord database adapter implementation.
+> In ancient Roman religion and myth, Janus (/ˈdʒeɪnəs/ JAY-nəs; Latin: Ianvs [ˈi̯aːnʊs]) is the god of beginnings, gates, transitions, time, duality, doorways,[2] passages, frames, and endings. [(wikipedia)](https://en.wikipedia.org/wiki/Janus)
+
+Janus ActiveRecord is generic primary/replica proxy for ActiveRecord 7.1+ and MySQL. It handles the switching of connections between primary and replica database servers. It comes with an ActiveRecord database adapter implementation.
 
 Janus is heavily inspired by [Makara](https://github.com/instacart/makara) from TaskRabbit and then Instacart. Unfortunately this project is unmaintained and broke for us with Rails 7.1. This is an attempt to start afresh on the project. It is definitely not as fully featured as Makara at this stage.
 
