@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module Mysql2Split
+module Janus
   class Context
-    THREAD_KEY = :mysql2_split_context
+    THREAD_KEY = :janus_ar_context
 
     # Stores the staged data with an expiration time based on the current time,
     # and clears any expired entries. Returns true if any changes were made to

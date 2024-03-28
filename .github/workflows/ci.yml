@@ -20,7 +20,7 @@ jobs:
         image: mysql:5.7
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_DATABASE: mysql2_split_test
+          MYSQL_DATABASE: janus_test
         ports:
           - 3306:3306
         options: >-

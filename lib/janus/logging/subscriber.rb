@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Mysql2Split
+module Janus
   module Logging
     module Subscriber
       IGNORE_PAYLOAD_NAMES = %w[SCHEMA EXPLAIN].freeze
@@ -17,7 +17,7 @@ module Mysql2Split
       protected
 
       def current_wrapper_name(_event)
-        connection = Mysql2Split::Context.last_used_connection
+        connection = Janus::Context.last_used_connection
         return nil unless connection
 
         "[#{connection}]"

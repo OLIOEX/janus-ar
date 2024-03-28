@@ -2,19 +2,19 @@
 
 require 'active_record/connection_adapters/abstract_adapter'
 require 'active_record/connection_adapters/mysql2_adapter'
-require_relative '../../mysql2_split'
+require_relative '../../janus'
 
 module ActiveRecord
   module ConnectionHandling
-    def mysql2_split_connection(config)
-      ActiveRecord::ConnectionAdapters::Mysql2SplitAdapter.new(config)
+    def janus_mysql2_connection(config)
+      ActiveRecord::ConnectionAdapters::JanusMysql2Adapter.new(config)
     end
   end
 end
 
 module ActiveRecord
   module ConnectionAdapters
-    class Mysql2SplitAdapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
+    class JanusMysql2Adapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
       SQL_PRIMARY_MATCHERS = [
         /\A\s*select.+for update\Z/i, /select.+lock in share mode\Z/i,
         /\A\s*select.+(nextval|currval|lastval|get_lock|release_lock|pg_advisory_lock|pg_advisory_unlock)\(/i,
@@ -25,8 +25,8 @@ module ActiveRecord
       SQL_SKIP_ALL_MATCHERS = [/\A\s*set\s+local\s/i].freeze
 
       def initialize(*args)
-        @replica_config = args[0][:mysql2_split]['replica']
-        args[0] = args[0][:mysql2_split]['primary']
+        @replica_config = args[0][:janus]['replica']
+        args[0] = args[0][:janus]['primary']
 
         super(*args)
         @connection_parameters ||= args[0]
@@ -40,8 +40,8 @@ module ActiveRecord
         end
         return send_to_replica(sql, connection: :replica, method: :execute) if can_go_to_replica?(sql)
 
-        Mysql2Split::Context.stick_to_primary if write_query?(sql)
-        Mysql2Split::Context.used_connection(:primary)
+        Janus::Context.stick_to_primary if write_query?(sql)
+        Janus::Context.used_connection(:primary)
 
         super(sql)
       end
@@ -53,8 +53,8 @@ module ActiveRecord
         end
         return send_to_replica(sql, connection: :replica) if can_go_to_replica?(sql)
 
-        Mysql2Split::Context.stick_to_primary if write_query?(sql)
-        Mysql2Split::Context.used_connection(:primary)
+        Janus::Context.stick_to_primary if write_query?(sql)
+        Janus::Context.used_connection(:primary)
 
         super(sql, name, async:)
       end
@@ -86,7 +86,7 @@ module ActiveRecord
       end
 
       def can_go_to_replica?(sql)
-        return false if Mysql2Split::Context.use_primary? ||
+        return false if Janus::Context.use_primary? ||
                         open_transactions.positive? ||
                         SQL_PRIMARY_MATCHERS.any? { |matcher| sql =~ matcher }
 
@@ -94,7 +94,7 @@ module ActiveRecord
       end
 
       def send_to_replica(sql, connection: nil, method: :exec_query)
-        Mysql2Split::Context.used_connection(connection) if connection
+        Janus::Context.used_connection(connection) if connection
         if method == :execute
           replica_connection.execute(sql)
         else

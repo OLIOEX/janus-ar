@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Mysql2Split::Logging::Logger do
+RSpec.describe Janus::Logging::Logger do
   describe '.log' do
     let(:logger) { double('logger') }
 
@@ -9,7 +9,7 @@ RSpec.describe Mysql2Split::Logging::Logger do
     end
 
     it 'logs the message with the specified format' do
-      expect(logger).to receive(:send).with(:info, '[Mysql2Split] Test message')
+      expect(logger).to receive(:send).with(:info, '[Janus] Test message')
       described_class.log('Test message', :info)
     end
 

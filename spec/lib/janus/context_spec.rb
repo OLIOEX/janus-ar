@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'mysql2_split/context'
+require 'janus/context'
 
-RSpec.describe Mysql2Split::Context do
+RSpec.describe Janus::Context do
   describe '#initialize' do
     it 'sets the primary flag and expiry' do
       context = described_class.new(primary: true, expiry: 60)

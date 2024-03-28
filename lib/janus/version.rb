@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module Mysql2Split
-  unless defined?(::Mysql2Split::VERSION)
+module Janus
+  unless defined?(::Janus::VERSION)
     module VERSION
       MAJOR = 0
       MINOR = 1
@@ -13,5 +13,5 @@ module Mysql2Split
       end
     end
   end
-  ::Mysql2Split::VERSION
+  ::Janus::VERSION
 end
