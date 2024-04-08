@@ -1,5 +1,11 @@
 # Janus ActiveRecord
 
+<p align="center">
+  <img src="assets/janus-logo.png"
+     alt="Janus Logo"
+     style="float: left; margin: 0 auto; height: 500px;" />
+</p>
+
 ![Build Status](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml/badge.svg)
 
 > In ancient Roman religion and myth, Janus (/ˈdʒeɪnəs/ JAY-nəs; Latin: Ianvs [ˈi̯aːnʊs]) is the god of beginnings, gates, transitions, time, duality, doorways,[2] passages, frames, and endings. [(wikipedia)](https://en.wikipedia.org/wiki/Janus)
@@ -76,3 +82,8 @@ There are some edge cases:
 * Execution of specific methods such as `connect!`, `disconnect!`, `reconnect!`, and `clear_cache!` are invoked on all underlying connections
 * Calls inside a transaction will always be sent to the primary (otherwise changes from within the transaction could not be read back on most transaction isolation levels)
 * Locking reads (e.g. `SELECT ... FOR UPDATE`) will always be sent to the primary
+
+
+# Acknowlegements
+
+Amazing project logo by @undevelopedbruce.
