@@ -26,6 +26,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'mysql2'
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec', '~> 3'
-  gem.add_development_dependency 'rubocop', '~> 1.62.0'
+  gem.add_development_dependency 'rubocop', '~> 1.63.0'
   gem.add_development_dependency 'rubocop-rails', '~> 2.24.0'
 end
