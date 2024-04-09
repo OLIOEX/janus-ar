@@ -25,7 +25,11 @@ module ActiveRecord
       SQL_SKIP_ALL_MATCHERS = [/\A\s*set\s+local\s/i].freeze
 
       def initialize(*args)
-        args = parse_config(args)
+        args[0][:janus]['replica']['database'] = args[0][:database]
+        args[0][:janus]['primary']['database'] = args[0][:database]
+
+        @replica_config = args[0][:janus]['replica']
+        args[0] = args[0][:janus]['primary']
         super(*args)
         @connection_parameters ||= args[0]
         update_config
@@ -78,15 +82,6 @@ module ActiveRecord
       end
 
       private
-
-      def parse_config(args)
-        args[0][:janus]['replica']['database'] = args[0][:database]
-        args[0][:janus]['primary']['database'] = args[0][:database]
-
-        @replica_config = args[0][:janus]['replica']
-        args[0] = args[0][:janus]['primary']
-        args
-      end
 
       def should_send_to_all?(sql)
         SQL_ALL_MATCHERS.any? { |matcher| sql =~ matcher } && SQL_SKIP_ALL_MATCHERS.none? { |matcher| sql =~ matcher }
