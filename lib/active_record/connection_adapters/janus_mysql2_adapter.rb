@@ -25,13 +25,11 @@ module ActiveRecord
       SQL_SKIP_ALL_MATCHERS = [/\A\s*set\s+local\s/i].freeze
 
       def initialize(*args)
+        args[0][:janus]['replica']['database'] = args[0][:database]
+        args[0][:janus]['primary']['database'] = args[0][:database]
+
         @replica_config = args[0][:janus]['replica']
         args[0] = args[0][:janus]['primary']
-
-        if args[0]['database'].nil?
-          args[0]['database'] = nil
-          @replica_config['database'] = nil
-        end
 
         super(*args)
         @connection_parameters ||= args[0]
