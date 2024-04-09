@@ -108,7 +108,7 @@ module ActiveRecord
       end
 
       def write_query?(sql)
-        %w[INSERT UPDATE DELETE LOCK].include?(sql.split(' ').first)
+        %w[INSERT UPDATE DELETE LOCK CREATE GRANT].include?(sql.split(' ').first)
       end
 
       def replica_connection
