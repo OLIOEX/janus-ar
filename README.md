@@ -6,7 +6,7 @@
      style="float: left; margin: 0 auto; height: 500px;" />
 </p>
 
-![Build Status](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml/badge.svg)](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml)
 
 > In ancient Roman religion and myth, Janus (/ˈdʒeɪnəs/ JAY-nəs; Latin: Ianvs [ˈi̯aːnʊs]) is the god of beginnings, gates, transitions, time, duality, doorways,[2] passages, frames, and endings. [(wikipedia)](https://en.wikipedia.org/wiki/Janus)
 
