@@ -28,6 +28,11 @@ module ActiveRecord
         @replica_config = args[0][:janus]['replica']
         args[0] = args[0][:janus]['primary']
 
+        if args[0]['database'].nil?
+          args[0]['database'] = nil
+          @replica_config['database'] = nil
+        end
+
         super(*args)
         @connection_parameters ||= args[0]
         update_config
