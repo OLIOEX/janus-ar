@@ -25,12 +25,7 @@ module ActiveRecord
       SQL_SKIP_ALL_MATCHERS = [/\A\s*set\s+local\s/i].freeze
 
       def initialize(*args)
-        args[0][:janus]['replica']['database'] = args[0][:database]
-        args[0][:janus]['primary']['database'] = args[0][:database]
-
-        @replica_config = args[0][:janus]['replica']
-        args[0] = args[0][:janus]['primary']
-
+        args = parse_config(args)
         super(*args)
         @connection_parameters ||= args[0]
         update_config
@@ -84,16 +79,28 @@ module ActiveRecord
 
       private
 
+      def parse_config(args)
+        args[0][:janus]['replica']['database'] = args[0][:database]
+        args[0][:janus]['primary']['database'] = args[0][:database]
+
+        @replica_config = args[0][:janus]['replica']
+        args[0] = args[0][:janus]['primary']
+        args
+      end
+
       def should_send_to_all?(sql)
         SQL_ALL_MATCHERS.any? { |matcher| sql =~ matcher } && SQL_SKIP_ALL_MATCHERS.none? { |matcher| sql =~ matcher }
       end
 
       def can_go_to_replica?(sql)
-        return false if Janus::Context.use_primary? ||
-                        open_transactions.positive? ||
-                        SQL_PRIMARY_MATCHERS.any? { |matcher| sql =~ matcher }
+        !should_go_to_primary?(sql)
+      end
 
-        true
+      def should_go_to_primary?(sql)
+        Janus::Context.use_primary? ||
+          write_query?(sql) ||
+          open_transactions.positive? ||
+          SQL_PRIMARY_MATCHERS.any? { |matcher| sql =~ matcher }
       end
 
       def send_to_replica(sql, connection: nil, method: :exec_query)
