@@ -35,10 +35,10 @@ Update your **database.yml** as follows:
 ```yml
 development:
   adapter: janus_mysql2
+  database: database_name
   janus:
     primary:
       <<: *default
-      database: database_name
       host: primary-host.local
     replica:
       <<: *default
