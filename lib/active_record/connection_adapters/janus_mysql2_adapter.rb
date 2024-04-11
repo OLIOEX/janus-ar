@@ -25,7 +25,7 @@ module ActiveRecord
       SQL_ALL_MATCHERS = [/\A\s*set\s/i].freeze
       SQL_SKIP_ALL_MATCHERS = [/\A\s*set\s+local\s/i].freeze
 
-      attr_reader :config, :replica_connection
+      attr_reader :config
 
       def initialize(*args)
         args[0][:janus]['replica']['database'] = args[0][:database]

@@ -52,8 +52,9 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
 
     it 'creates replica connection as expected' do
       config = replica_config.dup.freeze
-      expect(subject.replica_connection.instance_variable_get(:@config)).to eq config.merge('database' => database,
-                                                                                            'flags' => ::Mysql2::Client::FOUND_ROWS).symbolize_keys
+      expect(
+        subject.replica_connection.instance_variable_get(:@config)
+      ).to eq config.merge('database' => database, 'flags' => ::Mysql2::Client::FOUND_ROWS).symbolize_keys
     end
 
     context 'Rails sets empty database for server connection' do
@@ -61,14 +62,17 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
 
       it 'creates primary connection as expected' do
         config = primary_config.dup.freeze
-        expect(subject.config).to eq config.merge('database' => nil,
-                                                  'flags' => ::Mysql2::Client::FOUND_ROWS).symbolize_keys
+        expect(subject.config).to eq config.merge(
+          'database' => nil,
+          'flags' => ::Mysql2::Client::FOUND_ROWS
+        ).symbolize_keys
       end
 
       it 'creates replica connection as expected' do
         config = replica_config.dup.freeze
-        expect(subject.replica_connection.instance_variable_get(:@config)).to eq config.merge('database' => nil,
-                                                                                              'flags' => ::Mysql2::Client::FOUND_ROWS).symbolize_keys
+        expect(
+          subject.replica_connection.instance_variable_get(:@config)
+        ).to eq config.merge('database' => nil, 'flags' => ::Mysql2::Client::FOUND_ROWS).symbolize_keys
       end
     end
   end
