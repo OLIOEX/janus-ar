@@ -24,7 +24,7 @@ class QueryLogger
     log('error', message)
   end
 
-  def get_logs
+  def queries
     @_logs
   end
 

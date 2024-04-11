@@ -92,7 +92,7 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
         FROM information_schema.tables
         WHERE table_schema = '#{database}';
         SQL
-      ).to_a.map { |row| subject.execute(row[0]) }
+                     ).to_a.map { |row| subject.execute(row[0]) }
     end
 
     it 'can list tables' do
@@ -101,7 +101,7 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
 
     it 'can create table' do
       create_test_table
-      expect(subject.execute('SHOW TABLES;').to_a).to eq [['test_table']]
+      expect(subject.execute('SHOW TABLES;').to_a).to eq [%w(test_table)]
     end
 
     describe 'SELECT' do
@@ -110,14 +110,14 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
         Janus::Context.release_all
         $query_logger.flush_all
         subject.execute('SELECT * FROM test_table;')
-        expect($query_logger.get_logs.first).to include 'replica'
+        expect($query_logger.queries.first).to include '[replica]'
       end
 
       it 'will read from primary after a write operation' do
         create_test_table
         $query_logger.flush_all
         subject.execute('SELECT * FROM test_table;')
-        expect($query_logger.get_logs.first).to include 'primary'
+        expect($query_logger.queries.first).to include '[primary]'
       end
     end
   end
