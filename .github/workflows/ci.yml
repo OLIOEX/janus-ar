@@ -17,10 +17,12 @@ jobs:
     name: Ruby ${{ matrix.ruby }}
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:5.8
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_DATABASE: janus_test
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_USER: primary_user
+          MYSQL_PASSWORD: primary_password
         ports:
           - 3306:3306
         options: >-
@@ -34,6 +36,8 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+      - run: |
+          mysql -u root -ppassword -h 127.0.0.1 -e "CREATE USER `replica`@`%' IDENTIFIED BY 'replica_password'; GRANT SELECT ON test.* TO `replica_user`@'%'; FLUSH PRIVILEGES;"
       - run: |
           bundle exec rspec
         env:

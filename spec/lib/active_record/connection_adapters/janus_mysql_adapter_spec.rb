@@ -17,19 +17,19 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
   it { expect(described_class::SQL_REPLICA_MATCHERS).to eq([/\A\s*(select|with.+\)\s*select)\s/i]) }
   it { expect(described_class::SQL_ALL_MATCHERS).to eq([/\A\s*set\s/i]) }
 
-  let(:database) { 'test-database' }
+  let(:database) { 'test' }
   let(:primary_config) do
     {
-      'username' => 'username',
-      'password' => 'primary-password',
-      'host' => 'primary-host',
+      'username' => 'primary_username',
+      'password' => 'primary_password',
+      'host' => '127.0.0.1',
     }
   end
   let(:replica_config) do
     {
-      'username' => 'replica-username',
-      'password' => 'replica-password',
-      'host' => 'replica-host',
+      'username' => 'replica_username',
+      'password' => 'replica_password',
+      'host' => '127.0.0.1',
       'pool' => 500,
     }
   end
@@ -76,4 +76,7 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
       end
     end
   end
+
+  describe 'Integration tests' do
+    before(:each) do
 end
