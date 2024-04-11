@@ -15,7 +15,7 @@ end
 module ActiveRecord
   module ConnectionAdapters
     class JanusMysql2Adapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
-      FOUND_ROWS = 'FOUND_ROWS'.freeze
+      FOUND_ROWS = 'FOUND_ROWS'
       SQL_PRIMARY_MATCHERS = [
         /\A\s*select.+for update\Z/i, /select.+lock in share mode\Z/i,
         /\A\s*select.+(nextval|currval|lastval|get_lock|release_lock|pg_advisory_lock|pg_advisory_unlock)\(/i,
@@ -25,8 +25,7 @@ module ActiveRecord
       SQL_ALL_MATCHERS = [/\A\s*set\s/i].freeze
       SQL_SKIP_ALL_MATCHERS = [/\A\s*set\s+local\s/i].freeze
 
-      attr_reader :config
-      attr_reader :replica_connection
+      attr_reader :config, :replica_connection
 
       def initialize(*args)
         args[0][:janus]['replica']['database'] = args[0][:database]
