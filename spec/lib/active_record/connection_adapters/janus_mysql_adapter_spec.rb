@@ -93,8 +93,7 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
         FROM information_schema.tables
         WHERE table_schema = '#{database}';
         SQL
-      ).to_a.map { |row| ActiveRecord::Base.connection.execute(row[0]) }
-
+                                           ).to_a.map { |row| ActiveRecord::Base.connection.execute(row[0]) }
     end
 
     it 'can list tables' do
