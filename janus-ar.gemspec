@@ -24,6 +24,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'activerecord', '>= 7.1.0'
   gem.add_development_dependency 'activesupport', '>= 7.1.0'
   gem.add_development_dependency 'mysql2'
+  gem.add_development_dependency 'pry'
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec', '~> 3'
   gem.add_development_dependency 'rubocop', '~> 1.63.0'
