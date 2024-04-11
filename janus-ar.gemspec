@@ -8,15 +8,15 @@ Gem::Specification.new do |gem|
   gem.description   = 'Read/Write proxy for ActiveRecord using primary/replica databases'
   gem.summary       = 'Read/Write proxy for ActiveRecord using primary/replica databases'
   gem.homepage      = 'https://github.com/olioex/janus-ar'
-  gem.licenses      = ['MIT']
+  gem.licenses      = %w(MIT)
   gem.metadata      = {
-    'source_code_uri' => 'https://github.com/olioex/janus-ar'
+    'source_code_uri' => 'https://github.com/olioex/janus-ar',
   }
 
   gem.files         = `git ls-files`.split($OUTPUT_RECORD_SEPARATOR)
   gem.executables   = gem.files.grep(%r{^bin/}).map { |f| File.basename(f) }
   gem.name          = 'janus-ar'
-  gem.require_paths = ['lib']
+  gem.require_paths = %w(lib)
   gem.version       = Janus::VERSION
 
   gem.required_ruby_version = '>= 3.2.0'
@@ -29,4 +29,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rspec', '~> 3'
   gem.add_development_dependency 'rubocop', '~> 1.63.0'
   gem.add_development_dependency 'rubocop-rails', '~> 2.24.0'
+  gem.add_development_dependency 'rubocop-rspec'
+  gem.add_development_dependency 'rubocop-thread_safety'
+  gem.add_development_dependency 'rubocop-performance'
 end

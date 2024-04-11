@@ -3,7 +3,7 @@
 module Janus
   module Logging
     module Subscriber
-      IGNORE_PAYLOAD_NAMES = %w[SCHEMA EXPLAIN].freeze
+      IGNORE_PAYLOAD_NAMES = %w(SCHEMA EXPLAIN).freeze
 
       def sql(event)
         name = event.payload[:name]

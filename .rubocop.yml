@@ -1,3 +1,6 @@
+inherit_from:
+  - https://tech.olioex.com/.support/rubocop-styling-v1.0
+
 require:
   - rubocop-rails
 
