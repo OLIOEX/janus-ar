@@ -17,4 +17,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           RUBYGEMS_API_KEY: ${{secrets.RUBYGEMS_API_KEY}}
-          RELEASE_COMMAND: gem build && gem push janus-ar-*.gem
+          RELEASE_COMMAND:
+            - gem build
+            - gem push janus-ar-*.gem
