@@ -16,18 +16,19 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
   }
   it { expect(described_class::SQL_REPLICA_MATCHERS).to eq([/\A\s*(select|with.+\)\s*select)\s/i]) }
   it { expect(described_class::SQL_ALL_MATCHERS).to eq([/\A\s*set\s/i]) }
+  it { expect(described_class::WRITE_PREFIXES).to eq %w(INSERT UPDATE DELETE LOCK CREATE GRANT DROP) }
 
   let(:database) { 'test' }
   let(:primary_config) do
     {
-      'username' => 'primary_username',
+      'username' => 'primary',
       'password' => 'primary_password',
       'host' => '127.0.0.1',
     }
   end
   let(:replica_config) do
     {
-      'username' => 'replica_username',
+      'username' => 'replica',
       'password' => 'replica_password',
       'host' => '127.0.0.1',
       'pool' => 500,
@@ -78,5 +79,45 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
   end
 
   describe 'Integration tests' do
-    before(:each) do
+    let(:create_test_table) { subject.execute('CREATE TABLE test_table (id INT);') }
+
+    after(:each) do
+      $query_logger.flush_all
+    end
+
+    after(:each) do
+      subject.execute(<<-SQL
+        SELECT CONCAT('DROP TABLE IF EXISTS `', table_name, '`;')
+        FROM information_schema.tables
+        WHERE table_schema = '#{database}';
+        SQL
+      ).to_a.map { |row| subject.execute(row[0]) }
+    end
+
+    it 'can list tables' do
+      expect(subject.execute('SHOW TABLES;').to_a).to eq []
+    end
+
+    it 'can create table' do
+      create_test_table
+      expect(subject.execute('SHOW TABLES;').to_a).to eq [['test_table']]
+    end
+
+    describe 'SELECT' do
+      it 'reads from `replica` by default' do
+        create_test_table
+        Janus::Context.release_all
+        $query_logger.flush_all
+        subject.execute('SELECT * FROM test_table;')
+        expect($query_logger.get_logs.first).to include 'replica'
+      end
+
+      it 'will read from primary after a write operation' do
+        create_test_table
+        $query_logger.flush_all
+        subject.execute('SELECT * FROM test_table;')
+        expect($query_logger.get_logs.first).to include 'primary'
+      end
+    end
+  end
 end

@@ -37,7 +37,7 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
       - run: |
-          mysql -u root -ppassword -h 127.0.0.1 -e "CREATE USER `replica`@`%' IDENTIFIED BY 'replica_password'; GRANT SELECT ON test.* TO `replica_user`@'%'; FLUSH PRIVILEGES;"
+          mysql -u root -p${{ env.MYSQL_PASSWORD || 'password' }} -h 127.0.0.1 -e "CREATE USER `replica`@'%' IDENTIFIED BY 'replica_password'; GRANT SELECT ON test.* TO `replica`@'%'; FLUSH PRIVILEGES;"
       - run: |
           bundle exec rspec
         env:

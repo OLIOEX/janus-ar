@@ -12,14 +12,29 @@ class QueryLogger
     @_logs = []
   end
 
-  def clear_logs
+  def flush_all
     @_logs = []
   end
 
-  def log(message)
-    @_logs << message
+  def log(level, message)
+    @_logs << "#{level}: #{message}"
+  end
+
+  def error(message)
+    log('error', message)
+  end
+
+  def get_logs
+    @_logs
+  end
+
+  def debug?
+    true
+  end
+
+  def debug(message)
+    log('debug', message)
   end
 end
 
-
-ActiveRecord::LogSubscriber.logger = QueryLogger.new
+$query_logger = ActiveRecord::Base.logger = QueryLogger.new
