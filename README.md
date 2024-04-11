@@ -68,11 +68,13 @@ Janus::Context.stick_to_primary
 
 ### Logging
 
-You can set a logger instance to ::Janus::Logging::Logger.logger and Janus.
+You can set a logger instance to `::Janus::Logging::Logger.logger`:
 
 ```ruby
 Janus::Logging::Logger.logger = ::Logger.new(STDOUT)
 ```
+
+If using `ActiveRecord` logging, Janus will append the name of the connection used to any logs e.g. `[primary]` or `[replica]`.
 
 ### What queries goes where?
 
