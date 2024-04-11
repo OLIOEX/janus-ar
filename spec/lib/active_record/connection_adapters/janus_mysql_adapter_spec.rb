@@ -80,28 +80,30 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
   end
 
   describe 'Integration tests' do
-    let(:create_test_table) { subject.execute('CREATE TABLE test_table (id INT);') }
+    let(:create_test_table) { ActiveRecord::Base.connection.execute('CREATE TABLE test_table (id INT);') }
 
-    after(:each) do
+    before(:each) do
       $query_logger.flush_all
+      ActiveRecord::Base.establish_connection(config)
     end
 
     after(:each) do
-      subject.execute(<<-SQL
+      ActiveRecord::Base.connection.execute(<<-SQL
         SELECT CONCAT('DROP TABLE IF EXISTS `', table_name, '`;')
         FROM information_schema.tables
         WHERE table_schema = '#{database}';
         SQL
-                     ).to_a.map { |row| subject.execute(row[0]) }
+      ).to_a.map { |row| ActiveRecord::Base.connection.execute(row[0]) }
+
     end
 
     it 'can list tables' do
-      expect(subject.execute('SHOW TABLES;').to_a).to eq []
+      expect(ActiveRecord::Base.connection.execute('SHOW TABLES;').to_a).to eq []
     end
 
     it 'can create table' do
       create_test_table
-      expect(subject.execute('SHOW TABLES;').to_a).to eq [%w(test_table)]
+      expect(ActiveRecord::Base.connection.execute('SHOW TABLES;').to_a).to eq [%w(test_table)]
     end
 
     describe 'SELECT' do
@@ -109,14 +111,14 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
         create_test_table
         Janus::Context.release_all
         $query_logger.flush_all
-        subject.execute('SELECT * FROM test_table;')
+        ActiveRecord::Base.connection.execute('SELECT * FROM test_table;')
         expect($query_logger.queries.first).to include '[replica]'
       end
 
       it 'will read from primary after a write operation' do
         create_test_table
         $query_logger.flush_all
-        subject.execute('SELECT * FROM test_table;')
+        ActiveRecord::Base.connection.execute('SELECT * FROM test_table;')
         expect($query_logger.queries.first).to include '[primary]'
       end
     end
