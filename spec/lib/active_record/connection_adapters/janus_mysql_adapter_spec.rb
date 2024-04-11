@@ -37,6 +37,7 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
   let(:config) do
     {
       database:,
+      adapter: 'janus_mysql2',
       janus: {
         'primary' => primary_config,
         'replica' => replica_config,
