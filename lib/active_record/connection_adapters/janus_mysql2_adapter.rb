@@ -24,6 +24,7 @@ module ActiveRecord
       SQL_REPLICA_MATCHERS = [/\A\s*(select|with.+\)\s*select)\s/i].freeze
       SQL_ALL_MATCHERS = [/\A\s*set\s/i].freeze
       SQL_SKIP_ALL_MATCHERS = [/\A\s*set\s+local\s/i].freeze
+      WRITE_PREFIXES = %w(INSERT UPDATE DELETE LOCK CREATE GRANT DROP).freeze
 
       attr_reader :config
 
@@ -116,7 +117,7 @@ module ActiveRecord
       end
 
       def write_query?(sql)
-        %w(INSERT UPDATE DELETE LOCK CREATE GRANT).include?(sql.split(' ').first)
+        WRITE_PREFIXES.include?(sql.split(' ').first)
       end
 
       def update_config

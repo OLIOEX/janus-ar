@@ -14,5 +14,9 @@ Metrics/BlockLength:
   Exclude:
     - spec/**/*
 
+Style/GlobalVars:
+  Exclude:
+    - 'spec/**/*'
+
 Metrics/AbcSize:
   Max: 22

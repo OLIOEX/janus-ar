@@ -16,26 +16,28 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
   }
   it { expect(described_class::SQL_REPLICA_MATCHERS).to eq([/\A\s*(select|with.+\)\s*select)\s/i]) }
   it { expect(described_class::SQL_ALL_MATCHERS).to eq([/\A\s*set\s/i]) }
+  it { expect(described_class::WRITE_PREFIXES).to eq %w(INSERT UPDATE DELETE LOCK CREATE GRANT DROP) }
 
-  let(:database) { 'test-database' }
+  let(:database) { 'test' }
   let(:primary_config) do
     {
-      'username' => 'username',
-      'password' => 'primary-password',
-      'host' => 'primary-host',
+      'username' => 'primary',
+      'password' => 'primary_password',
+      'host' => '127.0.0.1',
     }
   end
   let(:replica_config) do
     {
-      'username' => 'replica-username',
-      'password' => 'replica-password',
-      'host' => 'replica-host',
+      'username' => 'replica',
+      'password' => 'replica_password',
+      'host' => '127.0.0.1',
       'pool' => 500,
     }
   end
   let(:config) do
     {
       database:,
+      adapter: 'janus_mysql2',
       janus: {
         'primary' => primary_config,
         'replica' => replica_config,
@@ -73,6 +75,50 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
         expect(
           subject.replica_connection.instance_variable_get(:@config)
         ).to eq config.merge('database' => nil, 'flags' => ::Mysql2::Client::FOUND_ROWS).symbolize_keys
+      end
+    end
+  end
+
+  describe 'Integration tests' do
+    let(:create_test_table) { ActiveRecord::Base.connection.execute('CREATE TABLE test_table (id INT);') }
+
+    before(:each) do
+      $query_logger.flush_all
+      ActiveRecord::Base.establish_connection(config)
+    end
+
+    after(:each) do
+      ActiveRecord::Base.connection.execute(<<-SQL
+        SELECT CONCAT('DROP TABLE IF EXISTS `', table_name, '`;')
+        FROM information_schema.tables
+        WHERE table_schema = '#{database}';
+        SQL
+                                           ).to_a.map { |row| ActiveRecord::Base.connection.execute(row[0]) }
+    end
+
+    it 'can list tables' do
+      expect(ActiveRecord::Base.connection.execute('SHOW TABLES;').to_a).to eq []
+    end
+
+    it 'can create table' do
+      create_test_table
+      expect(ActiveRecord::Base.connection.execute('SHOW TABLES;').to_a).to eq [%w(test_table)]
+    end
+
+    describe 'SELECT' do
+      it 'reads from `replica` by default' do
+        create_test_table
+        Janus::Context.release_all
+        $query_logger.flush_all
+        ActiveRecord::Base.connection.execute('SELECT * FROM test_table;')
+        expect($query_logger.queries.first).to include '[replica]'
+      end
+
+      it 'will read from primary after a write operation' do
+        create_test_table
+        $query_logger.flush_all
+        ActiveRecord::Base.connection.execute('SELECT * FROM test_table;')
+        expect($query_logger.queries.first).to include '[primary]'
       end
     end
   end
