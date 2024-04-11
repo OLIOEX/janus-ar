@@ -5,8 +5,8 @@ require File.expand_path('lib/janus/version.rb', __dir__)
 Gem::Specification.new do |gem|
   gem.authors       = ['Lloyd Watkin']
   gem.email         = ['lloyd@olioex.com']
-  gem.description   = 'Read/Write proxy for ActiveRecord using primary/replca databases'
-  gem.summary       = 'Read/Write proxy for ActiveRecord using primary/replca databases'
+  gem.description   = 'Read/Write proxy for ActiveRecord using primary/replica databases'
+  gem.summary       = 'Read/Write proxy for ActiveRecord using primary/replica databases'
   gem.homepage      = 'https://github.com/olioex/janus-ar'
   gem.licenses      = ['MIT']
   gem.metadata      = {
@@ -24,6 +24,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'activerecord', '>= 7.1.0'
   gem.add_development_dependency 'activesupport', '>= 7.1.0'
   gem.add_development_dependency 'mysql2'
+  gem.add_development_dependency 'pry'
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec', '~> 3'
   gem.add_development_dependency 'rubocop', '~> 1.63.0'

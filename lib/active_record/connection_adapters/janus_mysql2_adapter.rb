@@ -15,6 +15,7 @@ end
 module ActiveRecord
   module ConnectionAdapters
     class JanusMysql2Adapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
+      FOUND_ROWS = 'FOUND_ROWS'.freeze
       SQL_PRIMARY_MATCHERS = [
         /\A\s*select.+for update\Z/i, /select.+lock in share mode\Z/i,
         /\A\s*select.+(nextval|currval|lastval|get_lock|release_lock|pg_advisory_lock|pg_advisory_unlock)\(/i,
@@ -24,12 +25,16 @@ module ActiveRecord
       SQL_ALL_MATCHERS = [/\A\s*set\s/i].freeze
       SQL_SKIP_ALL_MATCHERS = [/\A\s*set\s+local\s/i].freeze
 
+      attr_reader :config
+      attr_reader :replica_connection
+
       def initialize(*args)
         args[0][:janus]['replica']['database'] = args[0][:database]
         args[0][:janus]['primary']['database'] = args[0][:database]
 
         @replica_config = args[0][:janus]['replica']
         args[0] = args[0][:janus]['primary']
+
         super(*args)
         @connection_parameters ||= args[0]
         update_config
@@ -48,7 +53,7 @@ module ActiveRecord
         super(sql)
       end
 
-      def execute_and_free(sql, name = nil, async: false) # :nodoc:#
+      def execute_and_free(sql, name = nil, async: false)
         if should_send_to_all?(sql)
           send_to_replica(sql, name, connection: :all)
           return super(sql, name, async:)
@@ -81,6 +86,10 @@ module ActiveRecord
         super
       end
 
+      def replica_connection
+        @replica_connection ||= ActiveRecord::ConnectionAdapters::Mysql2Adapter.new(@replica_config)
+      end
+
       private
 
       def should_send_to_all?(sql)
@@ -111,15 +120,11 @@ module ActiveRecord
         %w[INSERT UPDATE DELETE LOCK CREATE GRANT].include?(sql.split(' ').first)
       end
 
-      def replica_connection
-        @replica_connection ||= ActiveRecord::ConnectionAdapters::Mysql2Adapter.new(@replica_config)
-      end
-
       def update_config
         @config[:flags] ||= 0
 
         if @config[:flags].is_a? Array
-          @config[:flags].push 'FOUND_ROWS'
+          @config[:flags].push FOUND_ROWS
         else
           @config[:flags] |= ::Mysql2::Client::FOUND_ROWS
         end

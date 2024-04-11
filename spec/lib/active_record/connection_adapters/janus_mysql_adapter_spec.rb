@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
+  subject { described_class.new(config) }
+
+  it { expect(described_class::FOUND_ROWS).to eq 'FOUND_ROWS' }
   it { expect(described_class::SQL_SKIP_ALL_MATCHERS).to eq [/\A\s*set\s+local\s/i] }
   it {
     expect(described_class::SQL_PRIMARY_MATCHERS).to eq(
@@ -13,4 +16,56 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
   }
   it { expect(described_class::SQL_REPLICA_MATCHERS).to eq([/\A\s*(select|with.+\)\s*select)\s/i]) }
   it { expect(described_class::SQL_ALL_MATCHERS).to eq([/\A\s*set\s/i]) }
+
+  let(:database) { 'test-database' }
+  let(:primary_config) do
+    {
+      'username' => 'username',
+      'password' => 'primary-password',
+      'host' => 'primary-host',
+  }
+  end
+  let(:replica_config) do
+    {
+      'username' => 'replica-username',
+      'password' => 'replica-password',
+      'host' => 'replica-host',
+      'pool' => 500,
+  }
+  end
+  let(:config) do
+    {
+      database:,
+      janus: {
+        'primary' => primary_config,
+        'replica' => replica_config,
+      }
+    }
+  end
+
+  describe 'Configuration' do
+    it 'creates primary connection as expected' do
+       config = primary_config.dup.freeze
+       expect(subject.config).to eq config.merge('database' => database, 'flags' => ::Mysql2::Client::FOUND_ROWS).symbolize_keys
+    end
+
+    it 'creates replica connection as expected' do
+      config = replica_config.dup.freeze
+      expect(subject.replica_connection.instance_variable_get(:@config)).to eq config.merge('database' => database, 'flags' => ::Mysql2::Client::FOUND_ROWS).symbolize_keys
+    end
+
+    context 'Rails sets empty database for server connection' do
+      let(:database) { nil }
+
+      it 'creates primary connection as expected' do
+        config = primary_config.dup.freeze
+       expect(subject.config).to eq config.merge('database' => nil, 'flags' => ::Mysql2::Client::FOUND_ROWS).symbolize_keys
+     end
+
+     it 'creates replica connection as expected' do
+      config = replica_config.dup.freeze
+      expect(subject.replica_connection.instance_variable_get(:@config)).to eq config.merge('database' => nil, 'flags' => ::Mysql2::Client::FOUND_ROWS).symbolize_keys
+     end
+    end
+  end
 end
