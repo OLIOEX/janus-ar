@@ -22,7 +22,7 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
     {
       'username' => 'username',
       'password' => 'primary-password',
-      'host' => 'primary-host'
+      'host' => 'primary-host',
     }
   end
   let(:replica_config) do
@@ -30,7 +30,7 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
       'username' => 'replica-username',
       'password' => 'replica-password',
       'host' => 'replica-host',
-      'pool' => 500
+      'pool' => 500,
     }
   end
   let(:config) do
@@ -38,8 +38,8 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
       database:,
       janus: {
         'primary' => primary_config,
-        'replica' => replica_config
-      }
+        'replica' => replica_config,
+      },
     }
   end
 
