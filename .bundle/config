@@ -1,0 +1,5 @@
+---
+BUNDLE_JOBS: "4"
+BUNDLE_BUILD__UNICODE: "--with-cflags=-Wno-incompatible-function-pointer-types"
+BUNDLE_BUILD__MYSQL2: "--with-ldflags=-L/opt/homebrew/opt/zstd/lib"
+BUNDLE_FROZEN: "false"
