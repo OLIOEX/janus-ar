@@ -4,7 +4,7 @@ module Janus
   unless defined?(::Janus::VERSION)
     module VERSION
       MAJOR = 0
-      MINOR = 11
+      MINOR = 12
       PATCH = 0
       PRE = nil
 
