@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Janus
   class DbConsoleConfig
     def initialize(config)
