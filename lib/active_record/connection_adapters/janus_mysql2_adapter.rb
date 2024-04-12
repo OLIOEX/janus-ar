@@ -13,6 +13,14 @@ module ActiveRecord
 end
 
 module ActiveRecord
+  class Base
+    def self.janus_mysql2_adapter_class
+      ActiveRecord::ConnectionAdapters::JanusMysql2Adapter
+    end
+  end
+end
+
+module ActiveRecord
   module ConnectionAdapters
     class JanusMysql2Adapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
       FOUND_ROWS = 'FOUND_ROWS'
@@ -27,6 +35,14 @@ module ActiveRecord
       WRITE_PREFIXES = %w(INSERT UPDATE DELETE LOCK CREATE GRANT DROP).freeze
 
       attr_reader :config
+
+      class << self
+        def dbconsole(config, options = {})
+          connection_config = Janus::DbConsoleConfig.new(config)
+
+          super(connection_config, options)
+        end
+      end
 
       def initialize(*args)
         args[0][:janus]['replica']['database'] = args[0][:database]
