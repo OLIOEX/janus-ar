@@ -121,5 +121,25 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
         expect($query_logger.queries.first).to include '[primary]'
       end
     end
+
+    describe 'INSERT' do
+      let(:insert_query) { 'INSERT INTO test_table SET `id` = 5;' }
+
+      before(:each) do
+        create_test_table
+        $query_logger.flush_all
+        Janus::Context.release_all
+      end
+
+      it 'sends INSERT query to primary' do
+        ActiveRecord::Base.connection.execute(insert_query)
+        expect($query_logger.queries.first).to include '[primary]'
+      end
+
+      it 'ignores case when directing queries' do
+        ActiveRecord::Base.connection.execute(insert_query.downcase)
+        expect($query_logger.queries.first).to include '[primary]'
+      end
+    end
   end
 end

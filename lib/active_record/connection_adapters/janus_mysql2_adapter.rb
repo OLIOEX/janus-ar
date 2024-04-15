@@ -133,7 +133,7 @@ module ActiveRecord
       end
 
       def write_query?(sql)
-        WRITE_PREFIXES.include?(sql.split(' ').first)
+        WRITE_PREFIXES.include?(sql.upcase.split(' ').first)
       end
 
       def update_config
