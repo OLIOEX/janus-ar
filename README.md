@@ -15,6 +15,8 @@ Janus ActiveRecord is generic primary/replica proxy for ActiveRecord 7.1+ and My
 
 Janus is heavily inspired by [Makara](https://github.com/instacart/makara) from TaskRabbit and then Instacart. Unfortunately this project is unmaintained and broke for us with Rails 7.1. This is an attempt to start afresh on the project. It is definitely not as fully featured as Makara at this stage.
 
+Learn more about its origins: [https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html](https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html).
+
 ## Installation
 
 Use the current version of the gem from [rubygems](https://rubygems.org/gems/janus-ar) in your `Gemfile`.
