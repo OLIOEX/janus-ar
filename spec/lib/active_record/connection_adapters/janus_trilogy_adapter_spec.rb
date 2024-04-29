@@ -12,7 +12,7 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
       'password' => 'primary_password',
       'host' => '127.0.0.1',
       'ssl' => true,
-      'ssl_mode' => 'REQUIRED',
+      'ssl_mode' => Trilogy::SSL_PREFERRED_NOVERIFY,
       'tls_min_version' => Trilogy::TLS_VERSION_12,
     }
   end
@@ -23,7 +23,7 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
       'host' => '127.0.0.1',
       'pool' => 500,
       'ssl' => true,
-      'ssl_mode' => 'REQUIRED',
+      'ssl_mode' => Trilogy::SSL_PREFERRED_NOVERIFY,
       'tls_min_version' => Trilogy::TLS_VERSION_12,
     }
   end
