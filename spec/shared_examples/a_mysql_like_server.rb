@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec.shared_examples 'a mysql like server' do
   let(:create_test_table) { ActiveRecord::Base.connection.execute("CREATE TABLE `#{table_name}` (id INT);") }
 
@@ -12,7 +13,7 @@ RSpec.shared_examples 'a mysql like server' do
       FROM information_schema.tables
       WHERE table_schema = '#{database}';
       SQL
-    ).to_a.map { |row| ActiveRecord::Base.connection.execute(row[0]) }
+                                         ).to_a.map { |row| ActiveRecord::Base.connection.execute(row[0]) }
   end
 
   it 'can list tables' do

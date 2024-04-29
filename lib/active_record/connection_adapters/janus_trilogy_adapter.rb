@@ -51,9 +51,9 @@ module ActiveRecord
         case where_to_send?(sql)
         when :all
           send_to_replica(sql, connection: :all, method: :execute)
-          return super
+          super
         when :replica
-          return send_to_replica(sql, connection: :replica, method: :execute)
+          send_to_replica(sql, connection: :replica, method: :execute)
         else
           Janus::Context.stick_to_primary if write_query?(sql)
           Janus::Context.used_connection(:primary)
@@ -65,9 +65,9 @@ module ActiveRecord
         case where_to_send?(sql)
         when :all
           send_to_replica(sql, connection: :all, method: :execute)
-          return super(sql)
+          super(sql)
         when :replica
-          return send_to_replica(sql, connection: :replica, method: :execute)
+          send_to_replica(sql, connection: :replica, method: :execute)
         else
           Janus::Context.stick_to_primary if write_query?(sql)
           Janus::Context.used_connection(:primary)
@@ -79,13 +79,13 @@ module ActiveRecord
         case where_to_send?(sql)
         when :all
           send_to_replica(sql, connection: :all, method: :execute)
-          return super(sql, name, async:)
+          super(sql, name, async:)
         when :replica
-          return send_to_replica(sql, connection: :replica, method: :execute)
+          send_to_replica(sql, connection: :replica, method: :execute)
         else
           Janus::Context.stick_to_primary if write_query?(sql)
           Janus::Context.used_connection(:primary)
-          return super(sql, name, async:)
+          super(sql, name, async:)
         end
       end
 
