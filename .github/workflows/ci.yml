@@ -21,8 +21,8 @@ jobs:
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: password
-          MYSQL_USER: primary
-          MYSQL_PASSWORD: primary_password
+          MYSQL_USER: test
+          MYSQL_PASSWORD: test_password
         ports:
           - 3306:3306
         options: >-
@@ -37,7 +37,13 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
       - run: |
-          mysql -u root -p${{ env.MYSQL_PASSWORD || 'password' }} -h 127.0.0.1 -e "CREATE USER 'replica'@'%' IDENTIFIED BY 'replica_password';GRANT SELECT ON test.* TO 'replica'@'%';FLUSH PRIVILEGES;"
+          ;FLUSH PRIVILEGES;"
+          mysql -e "CREATE USER 'replica'@'%' IDENTIFIED WITH mysql_native_password BY 'replica_password';" -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+          mysql -e "GRANT SELECT ON test.* TO 'replica'@'%'" -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+
+          mysql -e "CREATE USER 'primary'@'%' IDENTIFIED WITH mysql_native_password BY 'primary_password';" -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+          mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'primary'@'%';" -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+          mysql -e "FLUSH PRIVILEGES;" -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
       - run: |
           bundle exec rspec
         env:
