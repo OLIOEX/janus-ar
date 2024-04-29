@@ -23,6 +23,10 @@ RSpec.describe Janus::QueryDirector do
   end
 
   describe '#where_to_send?' do
+    before(:each) do
+      Janus::Context.release_all
+    end
+    
     context 'when should send to all' do
       it 'returns :all' do
         sql = 'SET foo = bar'
