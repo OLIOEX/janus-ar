@@ -19,6 +19,8 @@ Janus is heavily inspired by [Makara](https://github.com/instacart/makara) from 
 
 Learn more about its origins: [https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html](https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html).
 
+Notes: GEM is currently tested with MySQL 8, Ruby 3.2, ActiveRecord 7.1+
+
 ## Installation
 
 Use the current version of the gem from [rubygems](https://rubygems.org/gems/janus-ar) in your `Gemfile`.
@@ -57,6 +59,11 @@ Note: For `trilogy` please use adapter "janus_trilogy". You'll probably need to 
   ssl_mode: 'REQUIRED'
   tls_min_version: 3
 ```
+
+`tls_min_version` here refers to TLS1.2.
+
+Otherwise you will get an error like the following (see https://github.com/trilogy-libraries/trilogy/issues/26):
+> trilogy_auth_recv: caching_sha2_password requires either TCP with TLS or a unix socket: TRILOGY_UNSUPPORTED"
 
 ### Forcing connections
 
