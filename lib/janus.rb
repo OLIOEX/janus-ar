@@ -4,6 +4,7 @@ require 'active_support'
 
 module Janus
   autoload :Context, 'janus/context'
+  autoload :Client, 'janus/client'
   autoload :VERSION, 'janus/version'
   autoload :DbConsoleConfig, 'janus/db_console_config'
 
