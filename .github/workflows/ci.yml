@@ -37,7 +37,6 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
       - run: |
-          ;FLUSH PRIVILEGES;"
           mysql -e "CREATE USER 'replica'@'%' IDENTIFIED WITH mysql_native_password BY 'replica_password';" -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
           mysql -e "GRANT SELECT ON test.* TO 'replica'@'%'" -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
 
