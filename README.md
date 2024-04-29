@@ -11,11 +11,15 @@
 [![CI](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml/badge.svg)](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/janus-ar.svg)](https://badge.fury.io/rb/janus-ar)
 
-Janus ActiveRecord is generic primary/replica proxy for ActiveRecord 7.1+ and MySQL. It handles the switching of connections between primary and replica database servers. It comes with an ActiveRecord database adapter implementation.
+Janus ActiveRecord is generic primary/replica proxy for ActiveRecord 7.1+ and MySQL (via `mysql2` and `trilogy`). It handles the switching of connections between primary and replica database servers. It comes with an ActiveRecord database adapter implementation.
+
+Note: Trilogy support is experimental at this stage.
 
 Janus is heavily inspired by [Makara](https://github.com/instacart/makara) from TaskRabbit and then Instacart. Unfortunately this project is unmaintained and broke for us with Rails 7.1. This is an attempt to start afresh on the project. It is definitely not as fully featured as Makara at this stage.
 
 Learn more about its origins: [https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html](https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html).
+
+Notes: GEM is currently tested with MySQL 8, Ruby 3.2, ActiveRecord 7.1+
 
 ## Installation
 
@@ -48,6 +52,18 @@ development:
       password: ithappenstobedifferent
       host: replica-host.local
 ```
+Note: For `trilogy` please use adapter "janus_trilogy". You'll probably need to add the following to your configuration to have it connect:
+
+```yml
+  ssl: true
+  ssl_mode: 'REQUIRED'
+  tls_min_version: 3
+```
+
+`tls_min_version` here refers to TLS1.2.
+
+Otherwise you will get an error like the following (see https://github.com/trilogy-libraries/trilogy/issues/26):
+> trilogy_auth_recv: caching_sha2_password requires either TCP with TLS or a unix socket: TRILOGY_UNSUPPORTED"
 
 ### Forcing connections
 

@@ -19,4 +19,4 @@ Style/GlobalVars:
     - 'spec/**/*'
 
 Metrics/AbcSize:
-  Max: 22
+  Max: 25
