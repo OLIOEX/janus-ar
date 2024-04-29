@@ -11,7 +11,9 @@
 [![CI](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml/badge.svg)](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/janus-ar.svg)](https://badge.fury.io/rb/janus-ar)
 
-Janus ActiveRecord is generic primary/replica proxy for ActiveRecord 7.1+ and MySQL. It handles the switching of connections between primary and replica database servers. It comes with an ActiveRecord database adapter implementation.
+Janus ActiveRecord is generic primary/replica proxy for ActiveRecord 7.1+ and MySQL (via `mysql2` and `trilogy`). It handles the switching of connections between primary and replica database servers. It comes with an ActiveRecord database adapter implementation.
+
+Note: Trilogy support is experimental at this stage.
 
 Janus is heavily inspired by [Makara](https://github.com/instacart/makara) from TaskRabbit and then Instacart. Unfortunately this project is unmaintained and broke for us with Rails 7.1. This is an attempt to start afresh on the project. It is definitely not as fully featured as Makara at this stage.
 
@@ -47,6 +49,13 @@ development:
       <<: *default
       password: ithappenstobedifferent
       host: replica-host.local
+```
+Note: For `trilogy` please use adapter "janus_trilogy". You'll probably need to add the following to your configuration to have it connect:
+
+```yml
+  ssl: true
+  ssl_mode: 'REQUIRED'
+  tls_min_version: 3
 ```
 
 ### Forcing connections
