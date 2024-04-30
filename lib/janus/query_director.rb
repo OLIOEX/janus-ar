@@ -13,7 +13,7 @@ module Janus
     SQL_REPLICA_MATCHERS = [/\A\s*(select|with.+\)\s*select)\s/i].freeze
     SQL_ALL_MATCHERS = [/\A\s*set\s/i].freeze
     SQL_SKIP_ALL_MATCHERS = [/\A\s*set\s+local\s/i].freeze
-    WRITE_PREFIXES = %w(INSERT UPDATE DELETE LOCK CREATE GRANT DROP ALTER TRUNCATE FLUSH).freeze
+    WRITE_PREFIXES = %w(INSERT UPDATE DELETE LOCK CREATE GRANT DROP ALTER TRUNCATE BEGIN SAVEPOINT FLUSH).freeze
 
     def initialize(sql, open_transactions)
       @_sql = sql
