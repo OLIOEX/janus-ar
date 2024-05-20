@@ -100,7 +100,7 @@ GEM
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
     timeout (0.4.1)
-    trilogy (2.8.0)
+    trilogy (2.8.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
