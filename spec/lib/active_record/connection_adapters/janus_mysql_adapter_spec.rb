@@ -11,6 +11,9 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
       'username' => 'primary',
       'password' => 'primary_password',
       'host' => '127.0.0.1',
+      'ssl' => true,
+      'ssl_mode' => 'REQUIRED',
+      'tls_min_version' => 3,
     }
   end
   let(:replica_config) do
@@ -19,6 +22,9 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
       'password' => 'replica_password',
       'host' => '127.0.0.1',
       'pool' => 500,
+      'ssl' => true,
+      'ssl_mode' => 'REQUIRED',
+      'tls_min_version' => 3,
     }
   end
   let(:config) do
