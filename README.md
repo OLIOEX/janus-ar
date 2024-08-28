@@ -35,7 +35,9 @@ This project assumes that your read/write endpoints are handled by a separate sy
 
 After a write request during a thread the adapter will continue using the `primary` server, unless the context is specifically released.
 
-## Rails 7.2+
+### Setup 
+
+#### Rails 7.2+
 
 For Rails 7.2 you'll need to manually register the database adaptor in `config/application.rb` after requiring rails but before entering the application configuration, e.g.
 
@@ -47,7 +49,7 @@ ActiveRecord::ConnectionAdapters.register("janus_trilogy", "ActiveRecord::Connec
 ActiveRecord::ConnectionAdapters.register("janus_mysql2", "ActiveRecord::ConnectionAdapters::JanusMysql2Adapter", 'janus-ar/active_record/connection_adapters/janus_mysql2_adapter')
 ```
 
-## Rails <= 7.1
+#### Rails <= 7.1
 
 ActiveRecord 7.1 was tested up to releases v0.15.*. After this release we only tested  Rails 7.2+. This does not mean it is not compatible, just not tested.
 
