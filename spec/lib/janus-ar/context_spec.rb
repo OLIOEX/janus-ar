@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'janus/context'
+require 'janus-ar/context'
 
 RSpec.describe Janus::Context do
   describe '#initialize' do

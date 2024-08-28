@@ -2,7 +2,7 @@
 
 require 'active_record/connection_adapters/abstract_adapter'
 require 'active_record/connection_adapters/mysql2_adapter'
-require_relative '../../janus'
+require_relative '../../../janus-ar'
 
 module ActiveRecord
   module ConnectionHandling
@@ -45,6 +45,10 @@ module ActiveRecord
         super(*args)
         @connection_parameters ||= args[0]
         update_config
+      end
+
+      def with_connection(_args = {})
+        self
       end
 
       def raw_execute(sql, name, async: false, allow_retry: false, materialize_transactions: true)

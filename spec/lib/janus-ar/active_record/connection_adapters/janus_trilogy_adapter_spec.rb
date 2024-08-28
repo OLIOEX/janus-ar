@@ -14,6 +14,7 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
       'ssl' => true,
       'ssl_mode' => 'REQUIRED',
       'tls_min_version' => Trilogy::TLS_VERSION_12,
+      'found_rows' => true,
     }
   end
   let(:replica_config) do
@@ -25,6 +26,7 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
       'ssl' => true,
       'ssl_mode' => 'REQUIRED',
       'tls_min_version' => Trilogy::TLS_VERSION_12,
+      'found_rows' => true,
     }
   end
   let(:config) do

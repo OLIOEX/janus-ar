@@ -18,5 +18,9 @@ Style/GlobalVars:
   Exclude:
     - 'spec/**/*'
 
+Naming/FileName:
+  Exclude:
+    - lib/janus-ar.rb
+
 Metrics/AbcSize:
   Max: 25
