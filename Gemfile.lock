@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     janus-ar (0.15.2)
+      activerecord (>= 7.1.0, < 7.2)
 
 GEM
   remote: http://rubygems.org/
@@ -110,7 +111,6 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  activerecord (>= 7.1.0, < 7.2)
   activesupport (>= 7.1.0, < 7.2)
   janus-ar!
   mysql2
