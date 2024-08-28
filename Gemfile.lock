@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    janus-ar (0.15.2)
-      activerecord (>= 7.1.0, < 7.2)
+    janus-ar (7.2.0)
+      activerecord (~> 7.2)
 
 GEM
   remote: http://rubygems.org/
@@ -93,11 +93,8 @@ GEM
     rubocop-thread_safety (0.5.1)
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
-<<<<<<< HEAD
-    strscan (3.1.0)
-=======
     securerandom (0.3.1)
->>>>>>> a3ff78f (Add support for Rails 7.2+)
+    strscan (3.1.0)
     timeout (0.4.1)
     trilogy (2.8.1)
     tzinfo (2.0.6)
@@ -109,12 +106,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-<<<<<<< HEAD
-  activesupport (>= 7.1.0, < 7.2)
-=======
-  activerecord (>= 7.2.0)
   activesupport (>= 7.2.0)
->>>>>>> a3ff78f (Add support for Rails 7.2+)
   janus-ar!
   mysql2
   pry
