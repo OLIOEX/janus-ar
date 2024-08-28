@@ -42,9 +42,9 @@ For Rails 7.2 you'll need to manually register the database adaptor in `config/a
 ```ruby
 require 'rails/all'
 
-ActiveRecord::ConnectionAdapters.register("janus_trilogy", "ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter", 'janus-ar/lib/active_record/connection_adapters/janus_trilogy_adapter')
+ActiveRecord::ConnectionAdapters.register("janus_trilogy", "ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter", 'janus-ar/active_record/connection_adapters/janus_trilogy_adapter')
 # ...or...
-ActiveRecord::ConnectionAdapters.register("janus_mysql2", "ActiveRecord::ConnectionAdapters::JanusMysql2Adapter", 'janus-ar/lib/active_record/connection_adapters/janus_mysql2_adapter')
+ActiveRecord::ConnectionAdapters.register("janus_mysql2", "ActiveRecord::ConnectionAdapters::JanusMysql2Adapter", 'janus-ar/active_record/connection_adapters/janus_mysql2_adapter')
 ```
 
 ## Rails <= 7.1
