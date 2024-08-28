@@ -2,7 +2,7 @@
 
 require 'active_record/connection_adapters/abstract_adapter'
 require 'active_record/connection_adapters/trilogy_adapter'
-require_relative '../../janus'
+require_relative '../../janus-ar'
 
 module ActiveRecord
   module ConnectionHandling

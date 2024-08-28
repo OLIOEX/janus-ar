@@ -4,7 +4,7 @@ require 'pry'
 
 require 'active_record'
 
-require './lib/janus'
+require './lib/janus-ar'
 require './lib/active_record/connection_adapters/janus_mysql2_adapter'
 require './lib/active_record/connection_adapters/janus_trilogy_adapter'
 
