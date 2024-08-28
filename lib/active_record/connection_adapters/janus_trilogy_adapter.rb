@@ -89,6 +89,10 @@ module ActiveRecord
         end
       end
 
+      def with_connection(_args = {})
+        self
+      end
+
       def connect!(...)
         replica_connection.connect!(...)
         super

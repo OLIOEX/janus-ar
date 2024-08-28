@@ -8,6 +8,9 @@ require './lib/janus'
 require './lib/active_record/connection_adapters/janus_mysql2_adapter'
 require './lib/active_record/connection_adapters/janus_trilogy_adapter'
 
+ActiveRecord::ConnectionAdapters.register("janus_trilogy", "ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter")
+ActiveRecord::ConnectionAdapters.register("janus_mysql2", "ActiveRecord::ConnectionAdapters::JanusMysql2Adapter")
+
 require './spec/shared_examples/a_mysql_like_server.rb'
 
 class QueryLogger

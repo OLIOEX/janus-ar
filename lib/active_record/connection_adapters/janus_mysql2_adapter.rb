@@ -47,6 +47,10 @@ module ActiveRecord
         update_config
       end
 
+      def with_connection(_args = {})
+        self
+      end
+
       def raw_execute(sql, name, async: false, allow_retry: false, materialize_transactions: true)
         case where_to_send?(sql)
         when :all
@@ -87,6 +91,10 @@ module ActiveRecord
           Janus::Context.used_connection(:primary)
           super(sql, name, async:)
         end
+      end
+
+      def with_connection(_args)
+        self
       end
 
       def connect!(...)
