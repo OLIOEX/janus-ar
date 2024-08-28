@@ -1,28 +1,28 @@
 # frozen_string_literal: true
 
 require 'active_record/connection_adapters/abstract_adapter'
-require 'active_record/connection_adapters/trilogy_adapter'
-require_relative '../../janus-ar'
+require 'active_record/connection_adapters/mysql2_adapter'
+require_relative '../../../janus-ar'
 
 module ActiveRecord
   module ConnectionHandling
-    def janus_trilogy_connection(config)
-      ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter.new(config)
+    def janus_mysql2_connection(config)
+      ActiveRecord::ConnectionAdapters::JanusMysql2Adapter.new(config)
     end
   end
 end
 
 module ActiveRecord
   class Base
-    def self.janus_trilogy_adapter_class
-      ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter
+    def self.janus_mysql2_adapter_class
+      ActiveRecord::ConnectionAdapters::JanusMysql2Adapter
     end
   end
 end
 
 module ActiveRecord
   module ConnectionAdapters
-    class JanusTrilogyAdapter < ActiveRecord::ConnectionAdapters::TrilogyAdapter
+    class JanusMysql2Adapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
       FOUND_ROWS = 'FOUND_ROWS'
 
       attr_reader :config
@@ -39,21 +39,25 @@ module ActiveRecord
         args[0][:janus]['replica']['database'] = args[0][:database]
         args[0][:janus]['primary']['database'] = args[0][:database]
 
-        @replica_config = args[0][:janus]['replica'].symbolize_keys
-        args[0] = args[0][:janus]['primary'].symbolize_keys
+        @replica_config = args[0][:janus]['replica']
+        args[0] = args[0][:janus]['primary']
 
         super(*args)
         @connection_parameters ||= args[0]
         update_config
       end
 
+      def with_connection(_args = {})
+        self
+      end
+
       def raw_execute(sql, name, async: false, allow_retry: false, materialize_transactions: true)
         case where_to_send?(sql)
         when :all
-          send_to_replica(sql, connection: :all, method: :execute)
+          send_to_replica(sql, connection: :all, method: :raw_execute)
           super
         when :replica
-          send_to_replica(sql, connection: :replica, method: :execute)
+          send_to_replica(sql, connection: :replica, method: :raw_execute)
         else
           Janus::Context.stick_to_primary if write_query?(sql)
           Janus::Context.used_connection(:primary)
@@ -89,7 +93,7 @@ module ActiveRecord
         end
       end
 
-      def with_connection(_args = {})
+      def with_connection(_args)
         self
       end
 
@@ -114,7 +118,7 @@ module ActiveRecord
       end
 
       def replica_connection
-        @replica_connection ||= ActiveRecord::ConnectionAdapters::TrilogyAdapter.new(@replica_config)
+        @replica_connection ||= ActiveRecord::ConnectionAdapters::Mysql2Adapter.new(@replica_config)
       end
 
       private

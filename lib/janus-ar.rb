@@ -3,15 +3,15 @@
 require 'active_support'
 
 module Janus
-  autoload :Context, 'janus/context'
-  autoload :Client, 'janus/client'
-  autoload :QueryDirector, 'janus/query_director'
-  autoload :VERSION, 'janus/version'
-  autoload :DbConsoleConfig, 'janus/db_console_config'
+  autoload :Context, 'janus-ar/context'
+  autoload :Client, 'janus-ar/client'
+  autoload :QueryDirector, 'janus-ar/query_director'
+  autoload :VERSION, 'janus-ar/version'
+  autoload :DbConsoleConfig, 'janus-ar/db_console_config'
 
   module Logging
-    autoload :Subscriber, 'janus/logging/subscriber'
-    autoload :Logger, 'janus/logging/logger'
+    autoload :Subscriber, 'janus-ar/logging/subscriber'
+    autoload :Logger, 'janus-ar/logging/logger'
   end
 end
 

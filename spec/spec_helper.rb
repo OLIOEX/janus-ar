@@ -5,8 +5,8 @@ require 'pry'
 require 'active_record'
 
 require './lib/janus-ar'
-require './lib/active_record/connection_adapters/janus_mysql2_adapter'
-require './lib/active_record/connection_adapters/janus_trilogy_adapter'
+require './lib/janus-ar/active_record/connection_adapters/janus_mysql2_adapter'
+require './lib/janus-ar/active_record/connection_adapters/janus_trilogy_adapter'
 
 ActiveRecord::ConnectionAdapters.register("janus_trilogy", "ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter")
 ActiveRecord::ConnectionAdapters.register("janus_mysql2", "ActiveRecord::ConnectionAdapters::JanusMysql2Adapter")
