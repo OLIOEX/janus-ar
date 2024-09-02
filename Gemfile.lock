@@ -52,8 +52,6 @@ GEM
     rainbow (3.1.1)
     rake (13.2.1)
     regexp_parser (2.9.2)
-    rexml (3.3.6)
-      strscan
     rspec (3.13.0)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -67,15 +65,14 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.1)
-    rubocop (1.65.1)
+    rubocop (1.66.0)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
       parallel (~> 1.10)
       parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 2.4, < 3.0)
-      rexml (>= 3.2.5, < 4.0)
-      rubocop-ast (>= 1.31.1, < 2.0)
+      rubocop-ast (>= 1.32.1, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 3.0)
     rubocop-ast (1.32.1)
@@ -94,7 +91,6 @@ GEM
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
     securerandom (0.3.1)
-    strscan (3.1.0)
     timeout (0.4.1)
     trilogy (2.8.1)
     tzinfo (2.0.6)
@@ -112,7 +108,7 @@ DEPENDENCIES
   pry
   rake
   rspec (~> 3)
-  rubocop (~> 1.65.0)
+  rubocop (~> 1.66.0)
   rubocop-performance
   rubocop-rails (~> 2.26.0)
   rubocop-rspec
