@@ -92,7 +92,7 @@ GEM
     ruby-progressbar (1.13.0)
     securerandom (0.3.1)
     timeout (0.4.1)
-    trilogy (2.8.1)
+    trilogy (2.9.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
