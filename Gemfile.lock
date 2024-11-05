@@ -50,7 +50,7 @@ GEM
       coderay (~> 1.1)
       method_source (~> 1.0)
     racc (1.8.1)
-    rack (3.1.7)
+    rack (3.1.8)
     rainbow (3.1.1)
     rake (13.2.1)
     regexp_parser (2.9.2)
@@ -82,7 +82,7 @@ GEM
     rubocop-performance (1.22.1)
       rubocop (>= 1.48.1, < 2.0)
       rubocop-ast (>= 1.31.1, < 2.0)
-    rubocop-rails (2.26.2)
+    rubocop-rails (2.27.0)
       activesupport (>= 4.2.0)
       rack (>= 1.1)
       rubocop (>= 1.52.0, < 2.0)
@@ -112,7 +112,7 @@ DEPENDENCIES
   rspec (~> 3)
   rubocop (~> 1.68.0)
   rubocop-performance
-  rubocop-rails (~> 2.26.0)
+  rubocop-rails (~> 2.27.0)
   rubocop-rspec
   rubocop-thread_safety
   trilogy
