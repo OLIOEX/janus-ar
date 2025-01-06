@@ -51,7 +51,8 @@ module ActiveRecord
         self
       end
 
-      def raw_execute(sql, name, async: false, allow_retry: false, materialize_transactions: true)
+      def raw_execute(sql, name = nil, binds = [], prepare: false, async: false, allow_retry: false,
+        materialize_transactions: true, batch: false)
         case where_to_send?(sql)
         when :all
           send_to_replica(sql, connection: :all, method: :raw_execute)
