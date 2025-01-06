@@ -21,8 +21,8 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 3.2.0'
 
-  gem.add_dependency 'activerecord', '>= 7.2', '< 9.0'
-  gem.add_development_dependency 'activesupport', '>= 7.2.0'
+  gem.add_dependency 'activerecord', '>= 8.0', '< 9.0'
+  gem.add_development_dependency 'activesupport', '>= 8.0'
   gem.add_development_dependency 'mysql2'
   gem.add_development_dependency 'trilogy'
   gem.add_development_dependency 'pry'
