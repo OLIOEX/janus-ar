@@ -5,7 +5,7 @@ module Janus
     module VERSION
       MAJOR = 7
       MINOR = 2
-      PATCH = 1
+      PATCH = 2
       PRE = nil
 
       def self.to_s

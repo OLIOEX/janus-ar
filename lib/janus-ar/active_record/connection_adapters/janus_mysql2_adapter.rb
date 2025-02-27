@@ -54,10 +54,10 @@ module ActiveRecord
       def raw_execute(sql, name, async: false, allow_retry: false, materialize_transactions: true)
         case where_to_send?(sql)
         when :all
-          send_to_replica(sql, connection: :all, method: :raw_execute)
+          send_to_replica(sql, connection: :all, method: :raw_execute, name: name)
           super
         when :replica
-          send_to_replica(sql, connection: :replica, method: :raw_execute)
+          send_to_replica(sql, connection: :replica, method: :raw_execute, name: name)
         else
           Janus::Context.stick_to_primary if write_query?(sql)
           Janus::Context.used_connection(:primary)
@@ -65,13 +65,13 @@ module ActiveRecord
         end
       end
 
-      def execute(sql)
+      def execute(sql, name = nil)
         case where_to_send?(sql)
         when :all
-          send_to_replica(sql, connection: :all, method: :execute)
+          send_to_replica(sql, connection: :all, method: :execute, name: name)
           super(sql)
         when :replica
-          send_to_replica(sql, connection: :replica, method: :execute)
+          send_to_replica(sql, connection: :replica, method: :execute, name: name)
         else
           Janus::Context.stick_to_primary if write_query?(sql)
           Janus::Context.used_connection(:primary)
@@ -82,10 +82,10 @@ module ActiveRecord
       def execute_and_free(sql, name = nil, async: false, allow_retry: false)
         case where_to_send?(sql)
         when :all
-          send_to_replica(sql, connection: :all, method: :execute)
+          send_to_replica(sql, connection: :all, method: :execute, name: name)
           super(sql, name, async:)
         when :replica
-          send_to_replica(sql, connection: :replica, method: :execute)
+          send_to_replica(sql, connection: :replica, method: :execute, name: name)
         else
           Janus::Context.stick_to_primary if write_query?(sql)
           Janus::Context.used_connection(:primary)
@@ -123,15 +123,10 @@ module ActiveRecord
         Janus::QueryDirector.new(sql, open_transactions).where_to_send?
       end
 
-      def send_to_replica(sql, connection: nil, method: :exec_query)
+      def send_to_replica(sql, connection: nil, method: :exec_query, name:)
+        name ||= "SQL"
         Janus::Context.used_connection(connection) if connection
-        if method == :execute
-          replica_connection.execute(sql)
-        elsif method == :raw_execute
-          replica_connection.execute(sql)
-        else
-          replica_connection.exec_query(sql)
-        end
+        replica_connection.exec_query(sql, name)
       end
 
       def update_config
