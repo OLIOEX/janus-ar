@@ -68,10 +68,10 @@ module ActiveRecord
       def execute(sql, name = nil)
         case where_to_send?(sql)
         when :all
-          send_to_replica(sql, connection: :all, name:)
+          send_to_replica(sql, connection: :all, method: :execute, name:)
           super(sql)
         when :replica
-          send_to_replica(sql, connection: :replica, name:)
+          send_to_replica(sql, connection: :replica, method: :execute, name:)
         else
           Janus::Context.stick_to_primary if write_query?(sql)
           Janus::Context.used_connection(:primary)
@@ -120,14 +120,17 @@ module ActiveRecord
       private
 
       def where_to_send?(sql)
-        puts "Where to send sql: #{sql}"
         Janus::QueryDirector.new(sql, open_transactions).where_to_send?
       end
 
-      def send_to_replica(sql, connection: nil, name:)
+      def send_to_replica(sql, connection: nil, method: :exec_query, name:)
         name ||= "SQL"
         Janus::Context.used_connection(connection) if connection
-        replica_connection.exec_query(sql, name)
+        if method == :execute
+          replica_connection.execute(sql, name)
+        else
+          replica_connection.exec_query(sql, name)
+        end
       end
 
       def update_config
