@@ -37,7 +37,7 @@ GEM
     drb (2.2.3)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
-    json (2.13.0)
+    json (2.13.1)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
     logger (1.7.0)
@@ -45,7 +45,7 @@ GEM
     minitest (5.25.5)
     mysql2 (0.5.6)
     parallel (1.27.0)
-    parser (3.3.8.0)
+    parser (3.3.9.0)
       ast (~> 2.4.1)
       racc
     prism (1.4.0)
@@ -70,7 +70,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.4)
-    rubocop (1.78.0)
+    rubocop (1.79.0)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
@@ -78,8 +78,9 @@ GEM
       parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 2.9.3, < 3.0)
-      rubocop-ast (>= 1.45.1, < 2.0)
+      rubocop-ast (>= 1.46.0, < 2.0)
       ruby-progressbar (~> 1.7)
+      tsort (>= 0.2.0)
       unicode-display_width (>= 2.4.0, < 4.0)
     rubocop-ast (1.46.0)
       parser (>= 3.3.7.2)
@@ -104,6 +105,7 @@ GEM
     securerandom (0.4.1)
     timeout (0.4.3)
     trilogy (2.9.0)
+    tsort (0.2.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (3.1.4)
@@ -122,7 +124,7 @@ DEPENDENCIES
   pry
   rake
   rspec (~> 3)
-  rubocop (~> 1.78.0)
+  rubocop (~> 1.79.0)
   rubocop-performance
   rubocop-rails (~> 2.29.0)
   rubocop-rspec
