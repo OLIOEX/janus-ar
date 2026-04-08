@@ -30,7 +30,7 @@ GEM
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
     base64 (0.3.0)
-    bigdecimal (4.1.0)
+    bigdecimal (4.1.1)
     coderay (1.1.3)
     concurrent-ruby (1.3.6)
     connection_pool (3.0.2)
@@ -119,7 +119,7 @@ GEM
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     timeout (0.6.1)
-    trilogy (2.10.0)
+    trilogy (2.12.3)
       bigdecimal
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
