@@ -14,6 +14,9 @@ jobs:
       matrix:
         ruby:
           - '3.2'
+          - '3.3'
+          - '3.4'
+          - '4.0'
     name: Ruby ${{ matrix.ruby }}
     services:
       mysql:
@@ -31,7 +34,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -51,7 +54,7 @@ jobs:
   RuboCop:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'

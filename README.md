@@ -11,13 +11,13 @@
 [![CI](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml/badge.svg)](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/janus-ar.svg)](https://badge.fury.io/rb/janus-ar)
 
-Janus ActiveRecord is generic primary/replica proxy for ActiveRecord 7.1+ and MySQL (via `mysql2` and `trilogy`). It handles the switching of connections between primary and replica database servers. It comes with an ActiveRecord database adapter implementation.
+Janus ActiveRecord is a generic primary/replica proxy for ActiveRecord 8 and MySQL (via `mysql2` and `trilogy`). It handles the switching of connections between primary and replica database servers. It comes with an ActiveRecord database adapter implementation.
 
 Janus is heavily inspired by [Makara](https://github.com/instacart/makara) from TaskRabbit and then Instacart. Unfortunately this project is unmaintained and broke for us with Rails 7.1. This is an attempt to start afresh on the project. It is definitely not as fully featured as Makara at this stage.
 
 Learn more about its origins: [https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html](https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html).
 
-Notes: GEM is currently tested with MySQL 8, Ruby 3.2, ActiveRecord 7.1+
+Notes: the gem requires ActiveRecord `>= 8.0, < 9.0` and Ruby `>= 3.2`, and is tested against MySQL 8.
 
 ## Installation
 
@@ -83,12 +83,13 @@ Otherwise you will get an error like the following (see https://github.com/trilo
 
 ### Forcing connections
 
-A context is local to the curent thread of execution. This will allow you to stick to the primary safely in a single thread
-in systems such as sidekiq, for instance.
+A context is local to the current unit of work (thread or fiber, following ActiveRecord's configured isolation level). This allows you to stick to the primary safely within a single request or job, in systems such as Sidekiq for instance.
 
 #### Releasing stuck connections (clearing context)
 
-If you need to clear the current context, releasing any stuck connections, all you have to do is:
+In a Rails application the context is released automatically at the start of every unit of work wrapped by the Rails executor — web requests, ActiveJob and Sidekiq-on-Rails jobs — so stickiness from a write never leaks into the next request on a reused thread. You do not need to do anything for this.
+
+Outside of Rails (or to clear the context manually), call:
 
 ```ruby
 Janus::Context.release_all

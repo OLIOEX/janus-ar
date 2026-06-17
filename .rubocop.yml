@@ -4,6 +4,9 @@ inherit_from:
 require:
   - rubocop-rails
 
+AllCops:
+  SuggestExtensions: false
+
 Style/Documentation:
   Enabled: false
 
