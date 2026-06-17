@@ -82,4 +82,28 @@ RSpec.shared_examples 'a mysql like server' do
       expect(Janus::Context.last_used_connection).to eq :replica
     end
   end
+
+  describe 'ActiveRecord compatibility' do
+    before(:each) do
+      create_test_table
+      Janus::Context.release_all
+    end
+
+    it 'accepts the optional name argument on #execute' do
+      expect do
+        ActiveRecord::Base.connection.execute("SELECT * FROM `#{table_name}`;", 'CustomName')
+      end.not_to raise_error
+    end
+
+    it 'returns a usable result through the exec_query read path' do
+      ActiveRecord::Base.connection.execute("INSERT INTO `#{table_name}` SET `id` = 7;")
+      Janus::Context.release_all
+      $query_logger.flush_all
+
+      result = ActiveRecord::Base.connection.exec_query("SELECT `id` FROM `#{table_name}`")
+
+      expect(result.rows).to eq [[7]]
+      expect($query_logger.queries.first).to include '[replica]'
+    end
+  end
 end
