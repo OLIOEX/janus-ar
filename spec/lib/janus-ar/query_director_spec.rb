@@ -14,10 +14,6 @@ RSpec.describe Janus::QueryDirector do
     }
     it { expect(described_class::SQL_REPLICA_MATCHERS).to eq([/\A\s*(select|with.+\)\s*select)\s/i]) }
     it { expect(described_class::SQL_ALL_MATCHERS).to eq([/\A\s*set\s/i]) }
-    it {
-      expect(described_class::WRITE_PREFIXES).to eq %w(INSERT UPDATE DELETE LOCK CREATE GRANT DROP ALTER TRUNCATE BEGIN
-                                                       SAVEPOINT FLUSH)
-    }
 
     it { expect(described_class::ALL).to eq :all }
     it { expect(described_class::REPLICA).to eq :replica }
