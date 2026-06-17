@@ -63,6 +63,29 @@ RSpec.describe Janus::QueryDirector do
       end
     end
 
+    context 'with comments and whitespace around the statement' do
+      {
+        'a line (--) comment then a read' => "-- audit trail\nSELECT * FROM orders",
+        'a hash (#) comment then a read' => "# cache key\nSELECT * FROM orders",
+        'several stacked leading comments then a read' => "/* a */ /* b */\n\t SELECT 1",
+        'tabs and newlines then a read' => "\n\t  SELECT 1",
+      }.each do |label, query|
+        it "routes #{label} to the replica" do
+          expect(described_class.new(query, 0).where_to_send?).to eq(:replica)
+        end
+      end
+
+      {
+        'a line (--) comment then a write' => "-- triggered by job 42\nUPDATE orders SET state = 1",
+        'a hash (#) comment then a write' => "# backfill\nDELETE FROM orders",
+        'a block comment then a write' => "/* migration */ ALTER TABLE orders ADD COLUMN x INT",
+      }.each do |label, query|
+        it "routes #{label} to the primary" do
+          expect(described_class.new(query, 0).where_to_send?).to eq(:primary)
+        end
+      end
+    end
+
     context 'with locking reads' do
       it 'routes SELECT ... FOR UPDATE to the primary' do
         expect(described_class.new('SELECT * FROM users FOR UPDATE', 0).where_to_send?).to eq(:primary)
