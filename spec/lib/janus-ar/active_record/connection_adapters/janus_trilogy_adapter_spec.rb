@@ -91,6 +91,13 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
         janus: { 'primary' => primary_config, 'replica' => dead_replica_config },
       }
     end
+    let(:healthy_failover_config) do
+      {
+        database:,
+        adapter: 'janus_trilogy',
+        janus: { 'replica_failover' => true, 'primary' => primary_config, 'replica' => replica_config },
+      }
+    end
 
     it_behaves_like 'a failover capable server'
   end
