@@ -20,7 +20,7 @@ jobs:
     name: Ruby ${{ matrix.ruby }}
     services:
       mysql:
-        image: mysql:8
+        image: mysql:8.0
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: password
