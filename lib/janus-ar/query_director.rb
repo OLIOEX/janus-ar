@@ -15,6 +15,11 @@ module Janus
     SQL_SKIP_ALL_MATCHERS = [/\A\s*set\s+local\s/i].freeze
     WRITE_PREFIXES = %w(INSERT UPDATE DELETE LOCK CREATE GRANT DROP ALTER TRUNCATE BEGIN SAVEPOINT FLUSH).freeze
 
+    # Leading whitespace and SQL comments are stripped before matching so that an
+    # annotated statement (e.g. `/* app:web */ INSERT ...`) is classified by the
+    # statement itself rather than by the comment.
+    LEADING_NOISE = %r{\A(?:\s+|/\*.*?\*/|--[^\n]*(?:\n|\z)|\#[^\n]*(?:\n|\z))+}m
+
     def initialize(sql, open_transactions)
       @_sql = sql
       @_open_transactions = open_transactions
@@ -33,22 +38,43 @@ module Janus
     private
 
     def should_send_to_all?
-      SQL_ALL_MATCHERS.any? { |matcher| @_sql =~ matcher } && SQL_SKIP_ALL_MATCHERS.none? { |matcher| @_sql =~ matcher }
+      match_any?(SQL_ALL_MATCHERS) && !match_any?(SQL_SKIP_ALL_MATCHERS)
     end
 
+    # A replica may only serve a statement we positively recognise as a read and
+    # that nothing else forces onto the primary. Everything we do not recognise
+    # as a read defaults to the primary, which is the safe direction for a
+    # write/read proxy: a misrouted read only costs a little primary load, while
+    # a misrouted write is an error (or worse) against a read-only replica.
     def can_go_to_replica?
-      !should_go_to_primary?
+      read_query? && !should_go_to_primary?
+    end
+
+    def read_query?
+      match_any?(SQL_REPLICA_MATCHERS)
     end
 
     def should_go_to_primary?
       Janus::Context.use_primary? ||
-        write_query? ||
         @_open_transactions.positive? ||
-        SQL_PRIMARY_MATCHERS.any? { |matcher| @_sql =~ matcher }
+        write_query? ||
+        match_any?(SQL_PRIMARY_MATCHERS)
     end
 
     def write_query?
-      WRITE_PREFIXES.include?(@_sql.upcase.split(' ').first)
+      WRITE_PREFIXES.include?(first_keyword)
+    end
+
+    def first_keyword
+      @first_keyword ||= normalized_sql[/\A\s*(\w+)/, 1]&.upcase
+    end
+
+    def match_any?(matchers)
+      matchers.any? { |matcher| normalized_sql.match?(matcher) }
+    end
+
+    def normalized_sql
+      @normalized_sql ||= @_sql.sub(LEADING_NOISE, '')
     end
   end
 end
