@@ -58,6 +58,23 @@ RSpec.describe Janus::Context do
       expect(other).to be false
       expect(described_class.use_primary?).to be true
     end
+
+    it 'isolates the last used connection between threads' do
+      described_class.used_connection(:replica)
+      other = Thread.new do
+        described_class.used_connection(:primary)
+        described_class.last_used_connection
+      end.value
+      expect(other).to eq(:primary)
+      expect(described_class.last_used_connection).to eq(:replica)
+    end
+
+    it 'is safe to release a context that was never touched' do
+      Thread.new do
+        expect { described_class.release_all }.not_to raise_error
+        expect(described_class.use_primary?).to be false
+      end.join
+    end
   end
 
   describe '.install_reset_hook' do
@@ -77,6 +94,21 @@ RSpec.describe Janus::Context do
       described_class.install_reset_hook(executor)
 
       executor.wrap { described_class.stick_to_primary }
+
+      leaked = nil
+      executor.wrap { leaked = described_class.use_primary? }
+      expect(leaked).to be false
+    end
+
+    it 'still starts the next run clean after the previous run raised' do
+      described_class.install_reset_hook(executor)
+
+      expect do
+        executor.wrap do
+          described_class.stick_to_primary
+          raise 'boom'
+        end
+      end.to raise_error('boom')
 
       leaked = nil
       executor.wrap { leaked = described_class.use_primary? }
