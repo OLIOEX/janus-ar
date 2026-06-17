@@ -17,7 +17,12 @@ jobs:
           - '3.3'
           - '3.4'
           - '4.0'
-    name: Ruby ${{ matrix.ruby }}
+        gemfile:
+          - gemfiles/activerecord_8_0.gemfile
+          - gemfiles/activerecord_8_1.gemfile
+    name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }}
+    env:
+      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
     services:
       mysql:
         image: mysql:8.0
