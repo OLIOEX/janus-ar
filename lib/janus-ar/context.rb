@@ -1,15 +1,24 @@
 # frozen_string_literal: true
 
-module Janus
-  class Context
-    THREAD_KEY = :janus_ar_context
+require 'active_support/isolated_execution_state'
 
-    # Stores the staged data with an expiration time based on the current time,
-    # and clears any expired entries. Returns true if any changes were made to
-    # the current store
-    def initialize(primary: false, expiry: nil)
+module Janus
+  # Per-execution state that records whether the current unit of work has been
+  # pinned to the primary (e.g. after a write, so subsequent reads stay
+  # consistent). State is stored in ActiveSupport::IsolatedExecutionState so it
+  # follows the application's configured isolation level (thread or fiber),
+  # matching ActiveRecord itself.
+  #
+  # Because pooled threads/fibers are reused across requests and jobs, the
+  # context MUST be released between units of work or a thread that performed a
+  # single write would keep routing every later read to the primary. The Rails
+  # integration (see Janus::Railtie) does this automatically; outside Rails,
+  # call Janus::Context.release_all yourself (e.g. in a Sidekiq middleware).
+  class Context
+    STATE_KEY = :janus_ar_context
+
+    def initialize(primary: false)
       @primary = primary
-      @expiry = expiry
       @last_used_connection = :primary
     end
 
@@ -17,13 +26,8 @@ module Janus
       @primary = true
     end
 
-    def potential_write
-      stick_to_primary
-    end
-
     def release_all
       @primary = false
-      @expiry = nil
       @last_used_connection = nil
     end
 
@@ -58,22 +62,17 @@ module Janus
         current.last_used_connection
       end
 
+      # Release the context at the start of every unit of work wrapped by the
+      # given ActiveSupport executor (web requests, ActiveJob and
+      # Sidekiq-on-Rails jobs all run inside it).
+      def install_reset_hook(executor)
+        executor.to_run { Janus::Context.release_all }
+      end
+
       protected
 
       def current
-        fetch(THREAD_KEY) { new }
-      end
-
-      def fetch(key)
-        get(key) || set(key, yield)
-      end
-
-      def get(key)
-        Thread.current.thread_variable_get(key)
-      end
-
-      def set(key, value)
-        Thread.current.thread_variable_set(key, value)
+        ActiveSupport::IsolatedExecutionState[STATE_KEY] ||= new
       end
     end
   end
