@@ -75,4 +75,24 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
 
     it_behaves_like 'a mysql like server'
   end
+
+  describe 'Replica failover' do
+    let(:dead_replica_config) { replica_config.merge('port' => 13_306) }
+    let(:failover_config) do
+      {
+        database:,
+        adapter: 'janus_mysql2',
+        janus: { 'replica_failover' => true, 'primary' => primary_config, 'replica' => dead_replica_config },
+      }
+    end
+    let(:no_failover_config) do
+      {
+        database:,
+        adapter: 'janus_mysql2',
+        janus: { 'primary' => primary_config, 'replica' => dead_replica_config },
+      }
+    end
+
+    it_behaves_like 'a failover capable server'
+  end
 end
