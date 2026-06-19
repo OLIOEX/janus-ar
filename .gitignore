@@ -1,2 +1,3 @@
 janus-ar-*.gem
 .rubocop-*
+gemfiles/*.gemfile.lock

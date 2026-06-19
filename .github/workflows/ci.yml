@@ -14,10 +14,18 @@ jobs:
       matrix:
         ruby:
           - '3.2'
-    name: Ruby ${{ matrix.ruby }}
+          - '3.3'
+          - '3.4'
+          - '4.0'
+        gemfile:
+          - gemfiles/activerecord_8_0.gemfile
+          - gemfiles/activerecord_8_1.gemfile
+    name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }}
+    env:
+      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
     services:
       mysql:
-        image: mysql:8
+        image: mysql:8.0
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: password
@@ -31,7 +39,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -51,7 +59,7 @@ jobs:
   RuboCop:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
