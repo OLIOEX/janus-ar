@@ -20,3 +20,5 @@ ActiveSupport.on_load(:active_record) do
     subscriber.extend Janus::Logging::Subscriber
   end
 end
+
+require 'janus-ar/railtie' if defined?(Rails::Railtie)
