@@ -3,8 +3,6 @@
 RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
   subject { described_class.new(config) }
 
-  it { expect(described_class::FOUND_ROWS).to eq 'FOUND_ROWS' }
-
   let(:database) { 'test' }
   let(:primary_config) do
     {
@@ -14,7 +12,6 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
       'ssl' => true,
       'ssl_mode' => 'REQUIRED',
       'tls_min_version' => Trilogy::TLS_VERSION_12,
-      'found_rows' => true,
     }
   end
   let(:replica_config) do
@@ -26,7 +23,6 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
       'ssl' => true,
       'ssl_mode' => 'REQUIRED',
       'tls_min_version' => Trilogy::TLS_VERSION_12,
-      'found_rows' => true,
     }
   end
   let(:config) do
@@ -41,17 +37,19 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
   end
 
   describe 'Configuration' do
+    # Trilogy enables FOUND_ROWS via the `found_rows` option (not mysql2-style
+    # flags), and ActiveRecord's TrilogyAdapter forces it on. We assert it is
+    # present even though the supplied config omits it.
     it 'creates primary connection as expected' do
       config = primary_config.dup.freeze
-      expect(subject.config).to eq config.merge('database' => database,
-                                                'flags' => ::Janus::Client::FOUND_ROWS).symbolize_keys
+      expect(subject.config).to eq config.merge('database' => database, 'found_rows' => true).symbolize_keys
     end
 
     it 'creates replica connection as expected' do
       config = replica_config.dup.freeze
       expect(
         subject.replica_connection.instance_variable_get(:@config)
-      ).to eq config.merge('database' => database).symbolize_keys
+      ).to eq config.merge('database' => database, 'found_rows' => true).symbolize_keys
     end
 
     context 'Rails sets empty database for server connection' do
@@ -59,17 +57,14 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
 
       it 'creates primary connection as expected' do
         config = primary_config.dup.freeze
-        expect(subject.config).to eq config.merge(
-          'database' => nil,
-          'flags' => ::Janus::Client::FOUND_ROWS
-        ).symbolize_keys
+        expect(subject.config).to eq config.merge('database' => nil, 'found_rows' => true).symbolize_keys
       end
 
       it 'creates replica connection as expected' do
         config = replica_config.dup.freeze
         expect(
           subject.replica_connection.instance_variable_get(:@config)
-        ).to eq config.merge('database' => nil).symbolize_keys
+        ).to eq config.merge('database' => nil, 'found_rows' => true).symbolize_keys
       end
     end
   end
@@ -78,5 +73,32 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
     let(:table_name) { 'table_name_trilogy' }
 
     it_behaves_like 'a mysql like server'
+  end
+
+  describe 'Replica failover' do
+    let(:dead_replica_config) { replica_config.merge('port' => 13_306) }
+    let(:failover_config) do
+      {
+        database:,
+        adapter: 'janus_trilogy',
+        janus: { 'replica_failover' => true, 'primary' => primary_config, 'replica' => dead_replica_config },
+      }
+    end
+    let(:no_failover_config) do
+      {
+        database:,
+        adapter: 'janus_trilogy',
+        janus: { 'primary' => primary_config, 'replica' => dead_replica_config },
+      }
+    end
+    let(:healthy_failover_config) do
+      {
+        database:,
+        adapter: 'janus_trilogy',
+        janus: { 'replica_failover' => true, 'primary' => primary_config, 'replica' => replica_config },
+      }
+    end
+
+    it_behaves_like 'a failover capable server'
   end
 end

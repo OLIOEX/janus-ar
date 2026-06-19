@@ -68,6 +68,24 @@ development:
       password: ithappenstobedifferent
       host: replica-host.local
 ```
+
+#### Replica failover (optional)
+
+By default a read that cannot reach the replica raises. Set `replica_failover: true` under `janus` to instead log a warning and retry the read on the primary when the replica connection fails:
+
+```yml
+  janus:
+    replica_failover: true
+    primary:
+      <<: *default
+      host: primary-host.local
+    replica:
+      <<: *default
+      host: replica-host.local
+```
+
+Only connection errors trigger the fallback; query errors still surface. This is a per-query retry with no circuit breaker, so for a sustained replica outage you should still rely on your endpoint-level failover (e.g. DNS).
+
 Note: For `trilogy` please use adapter "janus_trilogy". You'll probably need to add the following to your configuration to have it connect:
 
 ```yml

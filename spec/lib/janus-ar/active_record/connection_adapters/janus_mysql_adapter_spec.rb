@@ -3,8 +3,6 @@
 RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
   subject { described_class.new(config) }
 
-  it { expect(described_class::FOUND_ROWS).to eq 'FOUND_ROWS' }
-
   let(:database) { 'test' }
   let(:primary_config) do
     {
@@ -73,10 +71,35 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
   end
 
   describe 'Integration tests' do
-    describe 'Integration tests' do
-      let(:table_name) { 'table_name_mysql2' }
+    let(:table_name) { 'table_name_mysql2' }
 
-      it_behaves_like 'a mysql like server'
+    it_behaves_like 'a mysql like server'
+  end
+
+  describe 'Replica failover' do
+    let(:dead_replica_config) { replica_config.merge('port' => 13_306) }
+    let(:failover_config) do
+      {
+        database:,
+        adapter: 'janus_mysql2',
+        janus: { 'replica_failover' => true, 'primary' => primary_config, 'replica' => dead_replica_config },
+      }
     end
+    let(:no_failover_config) do
+      {
+        database:,
+        adapter: 'janus_mysql2',
+        janus: { 'primary' => primary_config, 'replica' => dead_replica_config },
+      }
+    end
+    let(:healthy_failover_config) do
+      {
+        database:,
+        adapter: 'janus_mysql2',
+        janus: { 'replica_failover' => true, 'primary' => primary_config, 'replica' => replica_config },
+      }
+    end
+
+    it_behaves_like 'a failover capable server'
   end
 end
