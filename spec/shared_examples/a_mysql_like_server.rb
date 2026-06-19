@@ -82,4 +82,74 @@ RSpec.shared_examples 'a mysql like server' do
       expect(Janus::Context.last_used_connection).to eq :replica
     end
   end
+
+  describe 'ActiveRecord compatibility' do
+    before(:each) do
+      create_test_table
+      Janus::Context.release_all
+    end
+
+    it 'accepts the optional name argument on #execute' do
+      expect do
+        ActiveRecord::Base.connection.execute("SELECT * FROM `#{table_name}`;", 'CustomName')
+      end.not_to raise_error
+    end
+
+    it 'returns a usable result through the exec_query read path' do
+      ActiveRecord::Base.connection.execute("INSERT INTO `#{table_name}` SET `id` = 7;")
+      Janus::Context.release_all
+      $query_logger.flush_all
+
+      result = ActiveRecord::Base.connection.exec_query("SELECT `id` FROM `#{table_name}`")
+
+      expect(result.rows).to eq [[7]]
+      expect($query_logger.queries.first).to include '[replica]'
+    end
+  end
+
+  describe 'Transactions' do
+    before(:each) do
+      create_test_table
+      Janus::Context.release_all
+      $query_logger.flush_all
+    end
+
+    it 'routes reads inside a transaction to the primary' do
+      ActiveRecord::Base.transaction do
+        ActiveRecord::Base.connection.execute("SELECT * FROM `#{table_name}`;")
+      end
+
+      selects = $query_logger.queries.select { |q| q.downcase.include?("select * from `#{table_name}`") }
+      expect(selects).not_to be_empty
+      expect(selects).to all(include('[primary]'))
+    end
+
+    it 'keeps later reads on the primary until the context is released' do
+      ActiveRecord::Base.transaction do
+        ActiveRecord::Base.connection.execute("INSERT INTO `#{table_name}` SET `id` = 1;")
+      end
+      $query_logger.flush_all
+
+      ActiveRecord::Base.connection.execute("SELECT * FROM `#{table_name}`;")
+      expect($query_logger.queries.last).to include '[primary]'
+
+      Janus::Context.release_all
+      ActiveRecord::Base.connection.execute("SELECT * FROM `#{table_name}`;")
+      expect($query_logger.queries.last).to include '[replica]'
+    end
+  end
+
+  describe 'SET statements' do
+    before(:each) { Janus::Context.release_all }
+
+    it 'sends a session SET down the broadcast (:all) path without error' do
+      expect do
+        ActiveRecord::Base.connection.execute("SET SESSION time_zone = '+00:00'")
+      end.not_to raise_error
+
+      # `:all` means the statement ran against the replica connection too, not
+      # just the primary - a write would have been marked `:primary`.
+      expect(Janus::Context.last_used_connection).to eq :all
+    end
+  end
 end
