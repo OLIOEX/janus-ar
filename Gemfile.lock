@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    janus-ar (7.2.0)
+    janus-ar (8.0.0)
       activerecord (>= 8.0, < 9.0)
 
 GEM
