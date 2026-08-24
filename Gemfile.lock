@@ -111,7 +111,7 @@ GEM
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     timeout (0.6.1)
-    trilogy (2.12.6)
+    trilogy (2.13.0)
       bigdecimal
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
