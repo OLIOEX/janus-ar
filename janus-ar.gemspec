@@ -13,8 +13,10 @@ Gem::Specification.new do |gem|
     'source_code_uri' => 'https://github.com/olioex/janus-ar',
   }
 
-  gem.files         = `git ls-files`.split($OUTPUT_RECORD_SEPARATOR)
-  gem.executables   = gem.files.grep(%r{^bin/}).map { |f| File.basename(f) }
+  ignored           = %r{^(bin|spec|assets|gemfiles|\.github)/|^\.}
+  gem.files         = `git ls-files`.split($OUTPUT_RECORD_SEPARATOR).grep_v(ignored)
+  # The gem ships no executables; bin/ holds repository maintenance scripts.
+  gem.executables   = []
   gem.name          = 'janus-ar'
   gem.require_paths = %w(lib)
   gem.version       = Janus::VERSION
