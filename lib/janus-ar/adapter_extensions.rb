@@ -74,6 +74,11 @@ module Janus
       super
     end
 
+    def discard!(...)
+      replica_connection.discard!(...)
+      super
+    end
+
     def disconnect!(...)
       replica_connection.disconnect!(...)
       super

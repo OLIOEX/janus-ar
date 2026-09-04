@@ -70,6 +70,12 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusMysql2Adapter do
     end
   end
 
+  describe 'Connection lifecycle' do
+    let(:replica_adapter_class) { ActiveRecord::ConnectionAdapters::Mysql2Adapter }
+
+    it_behaves_like 'an adapter forwarding lifecycle calls'
+  end
+
   describe 'Integration tests' do
     let(:table_name) { 'table_name_mysql2' }
 
