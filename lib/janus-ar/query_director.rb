@@ -5,19 +5,11 @@ module Janus
     REPLICA = :replica
     PRIMARY = :primary
 
-    # Reading any of these takes or inspects a lock, so it has to happen on the
-    # primary to mean anything.
     LOCK_FUNCTIONS = %w(
       nextval currval lastval get_lock release_lock is_free_lock is_used_lock
       pg_advisory_lock pg_advisory_unlock
     ).freeze
 
-    # These are matched anywhere in the statement (hence `/m`, and no `\Z`
-    # anchor): a locking clause is not always the final token on a single line.
-    # `FOR UPDATE SKIP LOCKED`, `FOR UPDATE NOWAIT`, `FOR UPDATE OF t`, MySQL
-    # 8's `FOR SHARE`, a trailing semicolon and multi-line formatting all have
-    # to reach the primary, or the lock is taken on a replica nobody else
-    # contends on and the application only believes it has mutual exclusion.
     SQL_PRIMARY_MATCHERS = [
       /\A\s*select\b.*\bfor\s+(update|share)\b/im,
       /\A\s*select\b.*\block\s+in\s+share\s+mode\b/im,

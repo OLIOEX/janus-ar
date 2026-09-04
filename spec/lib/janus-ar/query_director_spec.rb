@@ -118,8 +118,6 @@ RSpec.describe Janus::QueryDirector do
         end
       end
 
-      # `for update` / `for share` only force the primary when they are the
-      # locking clause, not when they are part of a longer identifier.
       {
         'a read whose column is named for_update' => 'SELECT for_update FROM users',
         'a read whose column is named lock_in_share_mode' => 'SELECT lock_in_share_mode FROM users',
