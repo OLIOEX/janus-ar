@@ -107,6 +107,24 @@ RSpec.shared_examples 'a mysql like server' do
     end
   end
 
+  describe 'Locking reads' do
+    before(:each) do
+      create_test_table
+      Janus::Context.release_all
+      $query_logger.flush_all
+    end
+
+    it 'sends a FOR UPDATE SKIP LOCKED claim to the primary' do
+      ActiveRecord::Base.connection.execute("SELECT * FROM `#{table_name}` LIMIT 1 FOR UPDATE SKIP LOCKED")
+      expect($query_logger.queries.last).to include '[primary]'
+    end
+
+    it 'sends a multi-line locking read to the primary' do
+      ActiveRecord::Base.connection.execute("SELECT *\nFROM `#{table_name}`\nWHERE id = 1\nFOR UPDATE")
+      expect($query_logger.queries.last).to include '[primary]'
+    end
+  end
+
   describe 'Transactions' do
     before(:each) do
       create_test_table

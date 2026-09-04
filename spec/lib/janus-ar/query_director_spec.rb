@@ -6,10 +6,17 @@ RSpec.describe Janus::QueryDirector do
     it {
       expect(described_class::SQL_PRIMARY_MATCHERS).to eq(
         [
-          /\A\s*select.+for update\Z/i, /select.+lock in share mode\Z/i,
-          /\A\s*select.+(nextval|currval|lastval|get_lock|release_lock|pg_advisory_lock|pg_advisory_unlock)\(/i,
-          /\A\s*show/i
+          /\A\s*select\b.*\bfor\s+(update|share)\b/im,
+          /\A\s*select\b.*\block\s+in\s+share\s+mode\b/im,
+          /\A\s*select\b.*\b(#{described_class::LOCK_FUNCTIONS.join('|')})\s*\(/im,
+          /\A\s*show\b/i,
         ]
+      )
+    }
+    it {
+      expect(described_class::LOCK_FUNCTIONS).to eq(
+        %w(nextval currval lastval get_lock release_lock is_free_lock is_used_lock pg_advisory_lock
+           pg_advisory_unlock)
       )
     }
     it { expect(described_class::SQL_REPLICA_MATCHERS).to eq([/\A\s*(select|with.+\)\s*select)\s/i]) }
@@ -87,16 +94,37 @@ RSpec.describe Janus::QueryDirector do
     end
 
     context 'with locking reads' do
-      it 'routes SELECT ... FOR UPDATE to the primary' do
-        expect(described_class.new('SELECT * FROM users FOR UPDATE', 0).where_to_send?).to eq(:primary)
+      {
+        'SELECT ... FOR UPDATE' => 'SELECT * FROM users FOR UPDATE',
+        'SELECT ... LOCK IN SHARE MODE' => 'SELECT * FROM users LOCK IN SHARE MODE',
+        'SELECT ... FOR UPDATE SKIP LOCKED' => 'SELECT * FROM jobs LIMIT 1 FOR UPDATE SKIP LOCKED',
+        'SELECT ... FOR UPDATE NOWAIT' => 'SELECT * FROM jobs FOR UPDATE NOWAIT',
+        'SELECT ... FOR UPDATE OF' => 'SELECT * FROM jobs AS j FOR UPDATE OF j',
+        'SELECT ... FOR SHARE' => 'SELECT * FROM jobs FOR SHARE',
+        'SELECT ... FOR SHARE NOWAIT' => 'SELECT * FROM jobs FOR SHARE NOWAIT',
+        'SELECT ... FOR UPDATE with a trailing semicolon' => 'SELECT * FROM users FOR UPDATE;',
+        'SELECT ... FOR UPDATE with trailing whitespace' => "SELECT * FROM users FOR UPDATE\n",
+        'a multi-line SELECT ... FOR UPDATE' => "SELECT *\nFROM accounts\nWHERE id = 1\nFOR UPDATE",
+        'a multi-line SELECT ... LOCK IN SHARE MODE' => "SELECT *\nFROM accounts\nLOCK IN SHARE MODE",
+        'SELECT ... FOR UPDATE split across lines' => "SELECT * FROM users\nFOR\nUPDATE",
+        'advisory lock reads' => "SELECT get_lock('x', 0)",
+        'a multi-line advisory lock read' => "SELECT\n  GET_LOCK(\"x\", 10)",
+        'IS_FREE_LOCK reads' => "SELECT IS_FREE_LOCK('x')",
+        'IS_USED_LOCK reads' => "SELECT IS_USED_LOCK('x')",
+        'advisory lock reads with space before the paren' => "SELECT get_lock ('x', 0)",
+      }.each do |label, query|
+        it "routes #{label} to the primary" do
+          expect(described_class.new(query, 0).where_to_send?).to eq(:primary)
+        end
       end
 
-      it 'routes SELECT ... LOCK IN SHARE MODE to the primary' do
-        expect(described_class.new('SELECT * FROM users LOCK IN SHARE MODE', 0).where_to_send?).to eq(:primary)
-      end
-
-      it 'routes advisory lock reads to the primary' do
-        expect(described_class.new("SELECT get_lock('x', 0)", 0).where_to_send?).to eq(:primary)
+      {
+        'a read whose column is named for_update' => 'SELECT for_update FROM users',
+        'a read whose column is named lock_in_share_mode' => 'SELECT lock_in_share_mode FROM users',
+      }.each do |label, query|
+        it "routes #{label} to the replica" do
+          expect(described_class.new(query, 0).where_to_send?).to eq(:replica)
+        end
       end
     end
 
