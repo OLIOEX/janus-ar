@@ -128,3 +128,24 @@ Janus does not support Rails' read/write split or sharding using `with_connectio
 # Acknowlegements
 
 Amazing project logo by @undevelopedbruce.
+
+## Releasing
+
+Releases are published to RubyGems automatically by
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml) when a `v*` tag
+is pushed. Authentication uses RubyGems
+[trusted publishing](https://guides.rubygems.org/trusted-publishing/) via OIDC —
+there is no API key to rotate.
+
+To cut a release:
+
+```bash
+bin/release.sh 8.1.0
+git push origin HEAD --follow-tags
+```
+
+`bin/release.sh` bumps `lib/janus-ar/version.rb`, regenerates `Gemfile.lock`
+(which records the gem's own version) and creates the tag. The tag name and the
+version in `version.rb` must match, and the working tree must be clean at the
+tagged commit — the publish workflow checks both before attempting to push the
+gem.

@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - v*
+
 jobs:
   push:
     runs-on: ubuntu-latest
@@ -14,12 +15,42 @@ jobs:
 
     steps:
       # Set up
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          bundler-cache: true
-          ruby-version: ruby
+          ruby-version: '3.4'
+
+      # `rubygems/release-gem` runs `bundle exec rake release`, which refuses to
+      # publish from a dirty working tree. Install to the system gem dir (rather
+      # than `bundler-cache: true`, which writes `vendor/bundle` and rewrites
+      # `.bundle/config`) so the checkout stays pristine.
+      - name: Install dependencies
+        run: bundle install --jobs 4
+
+      # Guards: both of these fail with a cryptic
+      # "There are files that need to be committed first" inside `rake release`
+      # if we let them through.
+      - name: Check tag matches gem version
+        run: |
+          gem_version="$(ruby -Ilib -r janus-ar/version -e 'print Janus::VERSION.to_s')"
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [ "$gem_version" != "$tag_version" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match lib/janus-ar/version.rb (${gem_version}). Use bin/release.sh to cut releases."
+            exit 1
+          fi
+
+      - name: Check working tree is clean
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Working tree is dirty after installing dependencies - Gemfile.lock is probably out of sync with the gemspec. Run 'bundle install' locally and commit the result."
+            git status --porcelain
+            git diff
+            exit 1
+          fi
 
       # Release
       - uses: rubygems/release-gem@v1
