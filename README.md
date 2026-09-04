@@ -119,7 +119,7 @@ There are some edge cases:
 * `SET` operations will be sent to all connections
 * Execution of specific methods such as `connect!`, `disconnect!`, `reconnect!`, and `clear_cache!` are invoked on all underlying connections
 * Calls inside a transaction will always be sent to the primary (otherwise changes from within the transaction could not be read back on most transaction isolation levels)
-* Locking reads (e.g. `SELECT ... FOR UPDATE`) will always be sent to the primary
+* Locking reads (e.g. `SELECT ... FOR UPDATE`, `FOR UPDATE SKIP LOCKED`, `FOR SHARE`, `LOCK IN SHARE MODE`, `GET_LOCK(...)`) will always be sent to the primary
 
 # Notes
 
