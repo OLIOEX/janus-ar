@@ -29,7 +29,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec', '~> 3'
   gem.add_development_dependency 'rubocop', '~> 1.90.0'
-  gem.add_development_dependency 'rubocop-rails', '~> 2.36.0'
+  gem.add_development_dependency 'rubocop-rails', '~> 2.37.0'
   gem.add_development_dependency 'rubocop-rspec'
   gem.add_development_dependency 'rubocop-thread_safety'
   gem.add_development_dependency 'rubocop-performance'
