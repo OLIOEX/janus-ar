@@ -1,9 +1,11 @@
 name: Publish GEM
 
+# Releases are cut from the GitHub Releases UI, so the tag is the source of
+# truth for the version. This workflow reads the version off the tag, writes it
+# into version.rb, commits that bump to main, then publishes to RubyGems.
 on:
-  push:
-    tags:
-      - v*
+  release:
+    types: [published]
 
 jobs:
   push:
@@ -13,10 +15,14 @@ jobs:
       contents: write
       id-token: write
 
+    env:
+      TAG_NAME: ${{ github.event.release.tag_name }}
+
     steps:
-      # Set up
+      # Check out main rather than the tag, because the bump is committed to it.
       - uses: actions/checkout@v7
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Set up Ruby
@@ -24,33 +30,100 @@ jobs:
         with:
           ruby-version: '3.4'
 
-      # `rubygems/release-gem` runs `bundle exec rake release`, which refuses to
-      # publish from a dirty working tree. Install to the system gem dir (rather
-      # than `bundler-cache: true`, which writes `vendor/bundle` and rewrites
-      # `.bundle/config`) so the checkout stays pristine.
-      - name: Install dependencies
-        run: bundle install --jobs 4
-
-      # Guards: both of these fail with a cryptic
-      # "There are files that need to be committed first" inside `rake release`
-      # if we let them through.
-      - name: Check tag matches gem version
+      - name: Derive gem version from the release tag
         run: |
-          gem_version="$(ruby -Ilib -r janus-ar/version -e 'print Janus::VERSION.to_s')"
-          tag_version="${GITHUB_REF_NAME#v}"
-          if [ "$gem_version" != "$tag_version" ]; then
-            echo "::error::Tag ${GITHUB_REF_NAME} does not match lib/janus-ar/version.rb (${gem_version}). Use bin/release.sh to cut releases."
+          version="${TAG_NAME#v}"
+          if ! [[ "$version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(\.(.+))?$ ]]; then
+            echo "::error::Release tag '${TAG_NAME}' is not a usable gem version. Expected vMAJOR.MINOR.PATCH[.PRE], for example v8.1.0 or v8.1.0.rc1."
+            exit 1
+          fi
+          {
+            echo "VERSION=${version}"
+            echo "VERSION_MAJOR=${BASH_REMATCH[1]}"
+            echo "VERSION_MINOR=${BASH_REMATCH[2]}"
+            echo "VERSION_PATCH=${BASH_REMATCH[3]}"
+            echo "VERSION_PRE=${BASH_REMATCH[5]:-}"
+          } >> "$GITHUB_ENV"
+
+      # The bump has to land on main, so the release must be cut from its head.
+      - name: Check the release tag is at the head of main
+        run: |
+          tag_sha="$(git rev-parse "refs/tags/${TAG_NAME}^{commit}")"
+          main_sha="$(git rev-parse HEAD)"
+          if [ "$tag_sha" != "$main_sha" ]; then
+            echo "::error::Tag ${TAG_NAME} is at ${tag_sha} but main is at ${main_sha}. Delete the release and recreate it against the current head of main."
+            exit 1
+          fi
+          echo "TAG_OBJECT=$(git rev-parse "refs/tags/${TAG_NAME}")" >> "$GITHUB_ENV"
+
+      - name: Write the version and refresh Gemfile.lock
+        run: |
+          pre_literal='nil'
+          [ -n "$VERSION_PRE" ] && pre_literal="'${VERSION_PRE}'"
+
+          cat > lib/janus-ar/version.rb <<RUBY
+          # frozen_string_literal: true
+
+          module Janus
+            unless defined?(::Janus::VERSION)
+              module VERSION
+                MAJOR = ${VERSION_MAJOR}
+                MINOR = ${VERSION_MINOR}
+                PATCH = ${VERSION_PATCH}
+                PRE = ${pre_literal}
+
+                def self.to_s
+                  [MAJOR, MINOR, PATCH, PRE].compact.join('.')
+                end
+              end
+            end
+            ::Janus::VERSION
+          end
+          RUBY
+
+          # Gemfile.lock records the gem's own version in its PATH section, so it
+          # has to move with version.rb or the tree is dirty when we publish.
+          bundle install --quiet
+
+          built="$(ruby -Ilib -r janus-ar/version -e 'print Janus::VERSION.to_s')"
+          if [ "$built" != "$VERSION" ]; then
+            echo "::error::Generated version.rb reports ${built}, expected ${VERSION}."
             exit 1
           fi
 
-      - name: Check working tree is clean
+      - name: Commit the bump to main and move the tag onto it
+        run: |
+          if git diff --quiet; then
+            echo "Already at ${VERSION}; nothing to commit."
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add lib/janus-ar/version.rb Gemfile.lock
+          git commit -m "Release v${VERSION}"
+          git push origin HEAD:main
+
+          # Point the release tag at the commit we actually publish, so checking
+          # out the tag gives you the released version. The lease makes this a
+          # no-op unless the tag is still exactly where we validated it above.
+          git tag -f -a "$TAG_NAME" -m "Version ${VERSION}"
+          git push --force-with-lease="refs/tags/${TAG_NAME}:${TAG_OBJECT}" \
+            origin "refs/tags/${TAG_NAME}"
+
+      # `rubygems/release-gem` runs `bundle exec rake release`, which refuses to
+      # publish from a dirty tree. Everything above is committed by now, so this
+      # should always pass; if it does not, fail with something readable rather
+      # than "There are files that need to be committed first".
+      - name: Check the working tree is clean
         run: |
           if [ -n "$(git status --porcelain)" ]; then
-            echo "::error::Working tree is dirty after installing dependencies - Gemfile.lock is probably out of sync with the gemspec. Run 'bundle install' locally and commit the result."
+            echo "::error::Working tree is dirty; refusing to publish."
             git status --porcelain
             git diff
             exit 1
           fi
 
-      # Release
+      # Publishes via trusted publishing (OIDC). `rake release` sees the tag
+      # already exists, so it skips creating one and just pushes the gem.
       - uses: rubygems/release-gem@v1
