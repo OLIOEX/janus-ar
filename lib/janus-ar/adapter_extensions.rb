@@ -74,11 +74,6 @@ module Janus
       super
     end
 
-    # ActiveRecord's ForkTracker discards every adapter in a forked child so
-    # that the child never closes a socket the parent is still using. The
-    # replica connection needs the same treatment, otherwise the child's
-    # replica client sends COM_QUIT down the parent's socket when it is
-    # garbage collected.
     def discard!(...)
       replica_connection.discard!(...)
       super
