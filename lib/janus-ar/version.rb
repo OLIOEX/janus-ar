@@ -4,8 +4,8 @@ module Janus
   unless defined?(::Janus::VERSION)
     module VERSION
       MAJOR = 8
-      MINOR = 0
-      PATCH = 1
+      MINOR = 1
+      PATCH = 0
       PRE = nil
 
       def self.to_s
