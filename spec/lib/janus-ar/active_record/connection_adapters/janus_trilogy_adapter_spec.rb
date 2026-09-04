@@ -69,6 +69,12 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
     end
   end
 
+  describe 'Connection lifecycle' do
+    let(:replica_adapter_class) { ActiveRecord::ConnectionAdapters::TrilogyAdapter }
+
+    it_behaves_like 'an adapter forwarding lifecycle calls'
+  end
+
   describe 'Integration tests' do
     let(:table_name) { 'table_name_trilogy' }
 

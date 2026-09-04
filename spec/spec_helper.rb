@@ -12,6 +12,7 @@ ActiveRecord::ConnectionAdapters.register("janus_trilogy", "ActiveRecord::Connec
 ActiveRecord::ConnectionAdapters.register("janus_mysql2", "ActiveRecord::ConnectionAdapters::JanusMysql2Adapter")
 
 require './spec/shared_examples/a_mysql_like_server.rb'
+require './spec/shared_examples/an_adapter_forwarding_lifecycle_calls.rb'
 
 class QueryLogger
   def initialize
