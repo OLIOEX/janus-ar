@@ -131,21 +131,23 @@ Amazing project logo by @undevelopedbruce.
 
 ## Releasing
 
-Releases are published to RubyGems automatically by
-[`.github/workflows/publish.yml`](.github/workflows/publish.yml) when a `v*` tag
-is pushed. Authentication uses RubyGems
-[trusted publishing](https://guides.rubygems.org/trusted-publishing/) via OIDC —
-there is no API key to rotate.
+Releases are cut from the [GitHub Releases UI](https://github.com/OLIOEX/janus-ar/releases/new).
+Publishing to RubyGems is automatic — there is nothing to bump by hand, and no
+API key to rotate (authentication uses RubyGems
+[trusted publishing](https://guides.rubygems.org/trusted-publishing/) over OIDC).
 
-To cut a release:
+To release:
 
-```bash
-bin/release.sh 8.1.0
-git push origin HEAD --follow-tags
-```
+1. Create a new release against the head of `main`, with a tag named
+   `vMAJOR.MINOR.PATCH` — e.g. `v8.1.0`. Pre-release suffixes use a dot, as
+   RubyGems requires: `v8.1.0.rc1`, not `v8.1.0-rc1`.
+2. Publish it.
 
-`bin/release.sh` bumps `lib/janus-ar/version.rb`, regenerates `Gemfile.lock`
-(which records the gem's own version) and creates the tag. The tag name and the
-version in `version.rb` must match, and the working tree must be clean at the
-tagged commit — the publish workflow checks both before attempting to push the
-gem.
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml) then takes the
+version from the tag, writes it into `lib/janus-ar/version.rb`, refreshes
+`Gemfile.lock`, commits that bump to `main` as `Release vX.Y.Z`, moves the tag
+onto that commit, and pushes the gem.
+
+Because the bump is committed to `main`, releases must be created from its head
+— the workflow refuses to publish if the tag sits anywhere else. You never need
+to edit `version.rb` yourself; the tag is the source of truth.
