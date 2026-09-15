@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 RSpec.shared_examples 'an adapter forwarding lifecycle calls' do
   let(:replica_connection) { instance_double(replica_adapter_class) }
 

@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 module Janus
   class QueryDirector
     ALL = :all

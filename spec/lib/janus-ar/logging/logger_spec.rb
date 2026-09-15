@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 RSpec.describe Janus::Logging::Logger do
   describe '.log' do
     let(:logger) { double('logger') }

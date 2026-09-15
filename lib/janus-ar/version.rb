@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Janus
   unless defined?(::Janus::VERSION)
     module VERSION

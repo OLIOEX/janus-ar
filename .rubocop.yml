@@ -27,3 +27,6 @@ Naming/FileName:
 
 Metrics/AbcSize:
   Max: 25
+
+Style/FrozenStringLiteralComment:
+  Enabled: false

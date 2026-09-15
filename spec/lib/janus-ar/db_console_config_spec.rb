@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'janus-ar/db_console_config'
 
 RSpec.describe Janus::DbConsoleConfig do

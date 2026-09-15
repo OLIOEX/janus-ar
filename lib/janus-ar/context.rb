@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'active_support/isolated_execution_state'
 
 module Janus

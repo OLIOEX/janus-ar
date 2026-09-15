@@ -62,8 +62,6 @@ jobs:
           [ -n "$VERSION_PRE" ] && pre_literal="'${VERSION_PRE}'"
 
           cat > lib/janus-ar/version.rb <<RUBY
-          # frozen_string_literal: true
-
           module Janus
             unless defined?(::Janus::VERSION)
               module VERSION
