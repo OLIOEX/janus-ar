@@ -32,17 +32,17 @@ module Janus
       @connection_parameters ||= args[0]
     end
 
-    # The argument lists below intentionally use anonymous splats and a bare
+    # The argument lists below intentionally use argument forwarding and a bare
     # `super`: ActiveRecord's `raw_execute`/`execute` signatures differ between
     # versions, so we forward whatever we are given unchanged rather than
     # restating (and pinning ourselves to) the current signature.
-    def raw_execute(sql, *, **)
+    def raw_execute(sql, ...)
       case where_to_send?(sql)
       when :all
-        send_to_replica(sql, :all)
+        send_raw_to_replica(sql, :all, ...)
         super
       when :replica
-        send_to_replica(sql, :replica)
+        send_raw_to_replica(sql, :replica, ...)
       else
         mark_primary(sql)
         super
@@ -104,6 +104,18 @@ module Janus
 
     def send_to_replica(sql, connection)
       Janus::Context.used_connection(connection)
+      replica_connection.execute(sql)
+    end
+
+    def send_raw_to_replica(sql, connection, ...)
+      Janus::Context.used_connection(connection)
+      forward_raw_execute(sql, ...)
+    end
+
+    # The MySQL adapters inline bind values into the SQL string, so replaying the
+    # statement alone is enough. Adapters that keep binds separate must override
+    # this to carry them across.
+    def forward_raw_execute(sql, *, **)
       replica_connection.execute(sql)
     end
   end

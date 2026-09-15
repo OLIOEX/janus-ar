@@ -5,12 +5,15 @@ require 'active_record'
 require './lib/janus-ar'
 require './lib/janus-ar/active_record/connection_adapters/janus_mysql2_adapter'
 require './lib/janus-ar/active_record/connection_adapters/janus_trilogy_adapter'
+require './lib/janus-ar/active_record/connection_adapters/janus_postgresql_adapter'
 
 ActiveRecord::ConnectionAdapters.register("janus_trilogy", "ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter")
 ActiveRecord::ConnectionAdapters.register("janus_mysql2", "ActiveRecord::ConnectionAdapters::JanusMysql2Adapter")
+ActiveRecord::ConnectionAdapters.register("janus_postgresql", "ActiveRecord::ConnectionAdapters::JanusPostgreSQLAdapter")
 
 require './spec/shared_examples/a_mysql_like_server.rb'
 require './spec/shared_examples/an_adapter_forwarding_lifecycle_calls.rb'
+require './spec/shared_examples/a_postgres_like_server.rb'
 
 class QueryLogger
   def initialize

@@ -4,13 +4,19 @@ module Janus
     REPLICA = :replica
     PRIMARY = :primary
 
+    # Regexp fragments, not literal names: PostgreSQL's advisory lock family has
+    # too many members to list.
     LOCK_FUNCTIONS = %w(
-      nextval currval lastval get_lock release_lock is_free_lock is_used_lock
-      pg_advisory_lock pg_advisory_unlock
+      nextval currval lastval setval get_lock release_lock is_free_lock is_used_lock
+      pg_(?:try_)?advisory_(?:xact_)?(?:un)?lock(?:_shared|_all)?
     ).freeze
 
+    # A string rather than a Regexp: interpolating a Regexp below would wrap it in
+    # a group that resets the /im flags, so `FOR UPDATE` would stop matching.
+    ROW_LOCK_STRENGTHS = 'no\s+key\s+update|key\s+share|update|share'
+
     SQL_PRIMARY_MATCHERS = [
-      /\A\s*select\b.*\bfor\s+(update|share)\b/im,
+      /\A\s*select\b.*\bfor\s+(?:#{ROW_LOCK_STRENGTHS})\b/im,
       /\A\s*select\b.*\block\s+in\s+share\s+mode\b/im,
       /\A\s*select\b.*\b(#{LOCK_FUNCTIONS.join('|')})\s*\(/im,
       /\A\s*show\b/i,

@@ -4,7 +4,7 @@ RSpec.describe Janus::QueryDirector do
     it {
       expect(described_class::SQL_PRIMARY_MATCHERS).to eq(
         [
-          /\A\s*select\b.*\bfor\s+(update|share)\b/im,
+          /\A\s*select\b.*\bfor\s+(?:#{described_class::ROW_LOCK_STRENGTHS})\b/im,
           /\A\s*select\b.*\block\s+in\s+share\s+mode\b/im,
           /\A\s*select\b.*\b(#{described_class::LOCK_FUNCTIONS.join('|')})\s*\(/im,
           /\A\s*show\b/i,
@@ -13,12 +13,13 @@ RSpec.describe Janus::QueryDirector do
     }
     it {
       expect(described_class::LOCK_FUNCTIONS).to eq(
-        %w(nextval currval lastval get_lock release_lock is_free_lock is_used_lock pg_advisory_lock
-           pg_advisory_unlock)
+        %w(nextval currval lastval setval get_lock release_lock is_free_lock is_used_lock
+           pg_(?:try_)?advisory_(?:xact_)?(?:un)?lock(?:_shared|_all)?)
       )
     }
     it { expect(described_class::SQL_REPLICA_MATCHERS).to eq([/\A\s*(select|with.+\)\s*select)\s/i]) }
     it { expect(described_class::SQL_ALL_MATCHERS).to eq([/\A\s*set\s/i]) }
+    it { expect(described_class::ROW_LOCK_STRENGTHS).to eq('no\s+key\s+update|key\s+share|update|share') }
 
     it { expect(described_class::ALL).to eq :all }
     it { expect(described_class::REPLICA).to eq :replica }
@@ -110,6 +111,17 @@ RSpec.describe Janus::QueryDirector do
         'IS_FREE_LOCK reads' => "SELECT IS_FREE_LOCK('x')",
         'IS_USED_LOCK reads' => "SELECT IS_USED_LOCK('x')",
         'advisory lock reads with space before the paren' => "SELECT get_lock ('x', 0)",
+        'SELECT ... FOR NO KEY UPDATE' => 'SELECT * FROM users FOR NO KEY UPDATE',
+        'SELECT ... FOR KEY SHARE' => 'SELECT * FROM users FOR KEY SHARE',
+        'a multi-line SELECT ... FOR NO KEY UPDATE' => "SELECT *\nFROM users\nFOR NO KEY UPDATE",
+        'pg_advisory_lock reads' => 'SELECT pg_advisory_lock(1)',
+        'pg_try_advisory_lock reads' => 'SELECT pg_try_advisory_lock(1)',
+        'pg_advisory_xact_lock reads' => 'SELECT pg_advisory_xact_lock(1)',
+        'pg_try_advisory_xact_lock_shared reads' => 'SELECT pg_try_advisory_xact_lock_shared(1)',
+        'pg_advisory_unlock reads' => 'SELECT pg_advisory_unlock(1)',
+        'pg_advisory_unlock_all reads' => 'SELECT pg_advisory_unlock_all()',
+        'sequence reads' => "SELECT nextval('users_id_seq')",
+        'setval reads' => "SELECT setval('users_id_seq', 1)",
       }.each do |label, query|
         it "routes #{label} to the primary" do
           expect(described_class.new(query, 0).where_to_send?).to eq(:primary)
@@ -119,6 +131,7 @@ RSpec.describe Janus::QueryDirector do
       {
         'a read whose column is named for_update' => 'SELECT for_update FROM users',
         'a read whose column is named lock_in_share_mode' => 'SELECT lock_in_share_mode FROM users',
+        'a read whose column is named for_no_key_update' => 'SELECT for_no_key_update FROM users',
       }.each do |label, query|
         it "routes #{label} to the replica" do
           expect(described_class.new(query, 0).where_to_send?).to eq(:replica)
