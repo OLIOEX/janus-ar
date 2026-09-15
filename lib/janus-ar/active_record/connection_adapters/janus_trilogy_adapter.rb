@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'active_record/connection_adapters/abstract_adapter'
 require 'active_record/connection_adapters/trilogy_adapter'
 require_relative '../../../janus-ar'

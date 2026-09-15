@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'janus-ar/context'
 require 'active_support/executor'
 

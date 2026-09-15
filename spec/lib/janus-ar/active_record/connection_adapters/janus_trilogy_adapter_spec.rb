@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 RSpec.describe ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter do
   subject { described_class.new(config) }
 

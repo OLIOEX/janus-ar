@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 RSpec.shared_examples 'a mysql like server' do
   let(:create_test_table) { ActiveRecord::Base.connection.execute("CREATE TABLE `#{table_name}` (id INT);") }
 

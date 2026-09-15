@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require File.expand_path('lib/janus-ar/version.rb', __dir__)
 
 Gem::Specification.new do |gem|

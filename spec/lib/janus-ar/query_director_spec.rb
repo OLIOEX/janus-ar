@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 RSpec.describe Janus::QueryDirector do
   describe 'Constants' do
     it { expect(described_class::SQL_SKIP_ALL_MATCHERS).to eq [/\A\s*set\s+local\s/i] }

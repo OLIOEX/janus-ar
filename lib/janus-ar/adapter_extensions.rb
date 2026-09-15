@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Janus
   # Behaviour shared by the Janus MySQL2 and Trilogy adapters.
   #
