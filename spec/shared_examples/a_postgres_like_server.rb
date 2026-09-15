@@ -220,7 +220,15 @@ RSpec.shared_examples 'a postgres like server' do
   end
 
   describe 'SET statements' do
-    before(:each) { Janus::Context.release_all }
+    before(:each) do
+      # Connect both sides up front. PostgreSQL's `configure_connection` runs
+      # its own reads (`load_additional_types` and friends) the first time a
+      # connection is used, and on a lazily connected primary those land inside
+      # the statement under test - overwriting the connection it recorded.
+      ActiveRecord::Base.connection.connect!
+      Janus::Context.release_all
+      $query_logger.flush_all
+    end
 
     it 'sends a session SET down the broadcast (:all) path without error' do
       expect do
