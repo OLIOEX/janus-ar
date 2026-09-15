@@ -114,14 +114,9 @@ module Janus
       forward_raw_execute(sql, ...)
     end
 
-    # Run a statement that arrived through ActiveRecord's low-level
-    # `raw_execute` funnel against the replica.
-    #
-    # The MySQL adapters inline bind values into the SQL string before they get
-    # here, so replaying the statement on its own is enough. Adapters that keep
-    # binds separate - PostgreSQL sends `$1` placeholders plus a parameter list -
-    # must override this to carry them across, or the replica would be handed
-    # placeholders with nothing to fill them.
+    # The MySQL adapters inline bind values into the SQL string, so replaying the
+    # statement alone is enough. Adapters that keep binds separate must override
+    # this to carry them across.
     def forward_raw_execute(sql, *, **)
       replica_connection.execute(sql)
     end

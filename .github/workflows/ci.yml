@@ -56,8 +56,7 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v7
-      # The `pg` gem builds against libpq; installing it explicitly keeps the
-      # bundle install below from depending on what the runner image ships.
+      # Ruby 4.0 has no precompiled `pg` build, so it compiles against libpq.
       - name: Install libpq headers
         run: sudo apt-get update && sudo apt-get install -y libpq-dev
       - uses: ruby/setup-ruby@v1
@@ -82,8 +81,8 @@ jobs:
             GRANT ALL ON SCHEMA public TO janus_primary;
             GRANT USAGE ON SCHEMA public TO janus_replica;
 
-            -- The suite creates its tables as janus_primary at runtime, so the
-            -- replica role needs standing SELECT on whatever that role makes.
+            -- The suite creates its tables at runtime, so the replica role needs
+            -- standing SELECT on whatever janus_primary goes on to make.
             ALTER DEFAULT PRIVILEGES FOR ROLE janus_primary IN SCHEMA public
               GRANT SELECT ON TABLES TO janus_replica;
             ALTER DEFAULT PRIVILEGES FOR ROLE janus_primary IN SCHEMA public

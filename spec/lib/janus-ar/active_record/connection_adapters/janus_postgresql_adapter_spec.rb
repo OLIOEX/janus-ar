@@ -68,10 +68,8 @@ RSpec.describe ActiveRecord::ConnectionAdapters::JanusPostgreSQLAdapter do
     end
   end
 
-  # The regression this guards: `raw_execute` used to replay the bare SQL on the
-  # replica, which on PostgreSQL means handing it `$1` placeholders and no
-  # parameters. The fake below stands in for the replica adapter so we can assert
-  # on the full argument list without needing a live server.
+  # A fake stands in for the replica adapter so the full argument list can be
+  # asserted on without a live server.
   describe 'Bind parameter forwarding' do
     let(:fake_replica) do
       Class.new do

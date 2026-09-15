@@ -14,8 +14,6 @@ RSpec.shared_examples 'a postgres like server' do
     Class.new(ActiveRecord::Base) do
       self.table_name = name
 
-      # Anonymous classes have no `name`, which ActiveRecord needs for
-      # validation messages and inspection.
       def self.name
         'JanusPostgresRecord'
       end
@@ -122,11 +120,9 @@ RSpec.shared_examples 'a postgres like server' do
     end
   end
 
-  # PostgreSQL never inlines bind values the way the MySQL adapters do: the
-  # statement reaches the adapter as `$1` placeholders with the values alongside
-  # it. A replica that is handed the SQL alone therefore fails with
-  # "there is no parameter $1", so these cover the full ActiveRecord stack
-  # rather than raw `execute` calls.
+  # Driven through the full ActiveRecord stack rather than raw `execute` calls:
+  # only then does the statement reach the adapter as `$1` placeholders with the
+  # values alongside, which is the case a replica can fail on.
   describe 'Bind parameters' do
     before(:each) do
       create_test_table
@@ -221,10 +217,9 @@ RSpec.shared_examples 'a postgres like server' do
 
   describe 'SET statements' do
     before(:each) do
-      # Connect both sides up front. PostgreSQL's `configure_connection` runs
-      # its own reads (`load_additional_types` and friends) the first time a
-      # connection is used, and on a lazily connected primary those land inside
-      # the statement under test - overwriting the connection it recorded.
+      # PostgreSQL's `configure_connection` runs its own reads on first use,
+      # which would otherwise land inside the statement under test and overwrite
+      # the connection it recorded.
       ActiveRecord::Base.connection.connect!
       Janus::Context.release_all
       $query_logger.flush_all

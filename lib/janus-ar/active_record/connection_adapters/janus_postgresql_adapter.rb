@@ -26,16 +26,12 @@ module ActiveRecord
         ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
       end
 
-      # PostgreSQL never inlines bind values: ActiveRecord compiles statements
-      # down to `$1` placeholders and hands the values to libpq separately, via
-      # `exec_params` or `exec_prepared`. Replaying the SQL on its own - which is
-      # all the MySQL adapters need - would reach the replica as placeholders
-      # with no parameters, so we forward the whole call instead.
+      # PostgreSQL compiles statements to `$1` placeholders and passes the values
+      # separately, so the replica needs the whole call, not just the SQL.
       #
-      # `raw_execute` is private on a stock adapter, hence the `send`. We target
-      # it rather than the public `execute` deliberately: the statement has
-      # already been through `preprocess_query` on the way in, and running the
-      # replica's public path would apply the query transformers a second time.
+      # `raw_execute` is private on a stock adapter, hence the `send`. It is the
+      # right target rather than the public `execute`: the statement has already
+      # been through `preprocess_query`, which we do not want applied twice.
       def forward_raw_execute(sql, ...)
         replica_connection.send(:raw_execute, sql, ...)
       end
