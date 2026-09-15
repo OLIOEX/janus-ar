@@ -17,7 +17,7 @@ Janus is heavily inspired by [Makara](https://github.com/instacart/makara) from 
 
 Learn more about its origins: [https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html](https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html).
 
-Notes: the gem requires ActiveRecord `>= 8.0, < 9.0` and Ruby `>= 3.2`, and is tested against MySQL 8 and PostgreSQL 17.
+Notes: the gem requires ActiveRecord `>= 8.0, < 9.0` and Ruby `>= 3.2`, and is tested against MySQL 8 and PostgreSQL 16 and 17.
 
 ## Installation
 

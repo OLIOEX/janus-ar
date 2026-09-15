@@ -20,7 +20,10 @@ jobs:
         gemfile:
           - gemfiles/activerecord_8_0.gemfile
           - gemfiles/activerecord_8_1.gemfile
-    name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }}
+        postgres:
+          - '16'
+          - '17'
+    name: Ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }} / PostgreSQL ${{ matrix.postgres }}
     env:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
     services:
@@ -39,7 +42,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       postgres:
-        image: postgres:17
+        image: postgres:${{ matrix.postgres }}
         env:
           POSTGRES_DB: test
           POSTGRES_USER: postgres
