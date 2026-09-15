@@ -38,8 +38,25 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v7
+      # The `pg` gem builds against libpq; installing it explicitly keeps the
+      # bundle install below from depending on what the runner image ships.
+      - name: Install libpq headers
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -51,10 +68,29 @@ jobs:
           mysql -e "CREATE USER 'primary'@'%' IDENTIFIED BY 'primary_password';" -u root -p${{ env.MYSQL_PASSWORD || 'password' }} -h 127.0.0.1
           mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'primary'@'%';" -u root -p${{ env.MYSQL_PASSWORD || 'password' }} -h 127.0.0.1
           mysql -e "FLUSH PRIVILEGES;" -u root -p${{ env.MYSQL_PASSWORD || 'password' }} -h 127.0.0.1
+      - name: Create PostgreSQL primary and replica roles
+        env:
+          PGPASSWORD: password
+        run: |
+          psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d test <<'SQL'
+            CREATE ROLE janus_primary LOGIN PASSWORD 'primary_password';
+            CREATE ROLE janus_replica LOGIN PASSWORD 'replica_password';
+
+            GRANT ALL ON SCHEMA public TO janus_primary;
+            GRANT USAGE ON SCHEMA public TO janus_replica;
+
+            -- The suite creates its tables as janus_primary at runtime, so the
+            -- replica role needs standing SELECT on whatever that role makes.
+            ALTER DEFAULT PRIVILEGES FOR ROLE janus_primary IN SCHEMA public
+              GRANT SELECT ON TABLES TO janus_replica;
+            ALTER DEFAULT PRIVILEGES FOR ROLE janus_primary IN SCHEMA public
+              GRANT SELECT, USAGE ON SEQUENCES TO janus_replica;
+          SQL
       - run: |
           bundle exec rspec
         env:
           MYSQL_HOST: 127.0.0.1
+          POSTGRES_HOST: 127.0.0.1
           RAILS_ENV: test
   RuboCop:
     runs-on: ubuntu-latest

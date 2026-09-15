@@ -5,13 +5,24 @@ module Janus
     REPLICA = :replica
     PRIMARY = :primary
 
+    # Regexp fragments for functions that take a lock or advance shared state, so
+    # a SELECT calling one has to run on the primary. PostgreSQL's advisory lock
+    # family (`pg_try_advisory_xact_lock_shared` and friends) has too many
+    # members to list, so it is matched as a group.
     LOCK_FUNCTIONS = %w(
-      nextval currval lastval get_lock release_lock is_free_lock is_used_lock
-      pg_advisory_lock pg_advisory_unlock
+      nextval currval lastval setval get_lock release_lock is_free_lock is_used_lock
+      pg_(?:try_)?advisory_(?:xact_)?(?:un)?lock(?:_shared|_all)?
     ).freeze
 
+    # Regexp fragment for the row lock strengths that force a read onto the
+    # primary. `FOR UPDATE` and `FOR SHARE` are MySQL and PostgreSQL;
+    # `FOR NO KEY UPDATE` and `FOR KEY SHARE` are PostgreSQL's two weaker
+    # strengths. Kept as a string rather than a Regexp so that interpolating it
+    # below does not wrap it in a group that resets the /im flags.
+    ROW_LOCK_STRENGTHS = 'no\s+key\s+update|key\s+share|update|share'
+
     SQL_PRIMARY_MATCHERS = [
-      /\A\s*select\b.*\bfor\s+(update|share)\b/im,
+      /\A\s*select\b.*\bfor\s+(?:#{ROW_LOCK_STRENGTHS})\b/im,
       /\A\s*select\b.*\block\s+in\s+share\s+mode\b/im,
       /\A\s*select\b.*\b(#{LOCK_FUNCTIONS.join('|')})\s*\(/im,
       /\A\s*show\b/i,

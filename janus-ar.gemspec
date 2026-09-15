@@ -26,6 +26,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'activerecord', '>= 8.0', '< 9.0'
   gem.add_development_dependency 'activesupport', '>= 8.0'
   gem.add_development_dependency 'mysql2'
+  gem.add_development_dependency 'pg'
   gem.add_development_dependency 'trilogy'
   gem.add_development_dependency 'pry'
   gem.add_development_dependency 'rake'

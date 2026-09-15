@@ -11,13 +11,13 @@
 [![CI](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml/badge.svg)](https://github.com/OLIOEX/janus-ar/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/janus-ar.svg)](https://badge.fury.io/rb/janus-ar)
 
-Janus ActiveRecord is a generic primary/replica proxy for ActiveRecord 8 and MySQL (via `mysql2` and `trilogy`). It handles the switching of connections between primary and replica database servers. It comes with an ActiveRecord database adapter implementation.
+Janus ActiveRecord is a generic primary/replica proxy for ActiveRecord 8, supporting MySQL (via `mysql2` and `trilogy`) and PostgreSQL (via `pg`). It handles the switching of connections between primary and replica database servers. It comes with an ActiveRecord database adapter implementation.
 
 Janus is heavily inspired by [Makara](https://github.com/instacart/makara) from TaskRabbit and then Instacart. Unfortunately this project is unmaintained and broke for us with Rails 7.1. This is an attempt to start afresh on the project. It is definitely not as fully featured as Makara at this stage.
 
 Learn more about its origins: [https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html](https://tech.olioex.com/ruby/2024/04/16/introducing-janus.html).
 
-Notes: the gem requires ActiveRecord `>= 8.0, < 9.0` and Ruby `>= 3.2`, and is tested against MySQL 8.
+Notes: the gem requires ActiveRecord `>= 8.0, < 9.0` and Ruby `>= 3.2`, and is tested against MySQL 8 and PostgreSQL 17.
 
 ## Installation
 
@@ -45,6 +45,8 @@ require 'rails/all'
 ActiveRecord::ConnectionAdapters.register("janus_trilogy", "ActiveRecord::ConnectionAdapters::JanusTrilogyAdapter", 'janus-ar/active_record/connection_adapters/janus_trilogy_adapter')
 # ...or...
 ActiveRecord::ConnectionAdapters.register("janus_mysql2", "ActiveRecord::ConnectionAdapters::JanusMysql2Adapter", 'janus-ar/active_record/connection_adapters/janus_mysql2_adapter')
+# ...or...
+ActiveRecord::ConnectionAdapters.register("janus_postgresql", "ActiveRecord::ConnectionAdapters::JanusPostgreSQLAdapter", 'janus-ar/active_record/connection_adapters/janus_postgresql_adapter')
 ```
 
 #### Rails <= 7.1
@@ -80,6 +82,45 @@ Note: For `trilogy` please use adapter "janus_trilogy". You'll probably need to 
 
 Otherwise you will get an error like the following (see https://github.com/trilogy-libraries/trilogy/issues/26):
 > trilogy_auth_recv: caching_sha2_password requires either TCP with TLS or a unix socket: TRILOGY_UNSUPPORTED"
+
+#### PostgreSQL
+
+Use adapter `janus_postgresql`, and add the `pg` gem to your `Gemfile`:
+
+```yml
+development:
+  adapter: janus_postgresql
+  database: database_name
+  janus:
+    primary:
+      <<: *default
+      host: primary-host.local
+      username: app
+      password: primary_password
+    replica:
+      <<: *default
+      host: replica-host.local
+      username: app_readonly
+      password: replica_password
+```
+
+Anything the adapter reads out of its own configuration — `pool`, `prepared_statements`,
+`insert_returning`, `variables`, `schema_search_path`, SSL settings and so on — must go
+inside the `primary:` and `replica:` blocks rather than alongside `adapter:`, because each
+connection is built from its own block.
+
+Two things worth knowing about the PostgreSQL adapter specifically:
+
+* Unlike MySQL, PostgreSQL never inlines bind values into the statement: reads
+  reach the replica as `$1` placeholders plus a separate parameter list, and
+  prepared statements are cached per connection. The adapter forwards binds and
+  the prepare flag to the replica, so each connection maintains its own
+  statement cache.
+* Type OIDs are resolved against whichever connection served the lookup. This is
+  correct for a physical (streaming) replica, where OIDs are identical to the
+  primary's by construction. If you point Janus at a logical replica whose custom
+  types, enums or extensions were created independently, the OIDs can diverge and
+  results may be cast with the wrong type.
 
 ### Forcing connections
 
@@ -119,7 +160,9 @@ There are some edge cases:
 * `SET` operations will be sent to all connections
 * Execution of specific methods such as `connect!`, `disconnect!`, `reconnect!`, and `clear_cache!` are invoked on all underlying connections
 * Calls inside a transaction will always be sent to the primary (otherwise changes from within the transaction could not be read back on most transaction isolation levels)
-* Locking reads (e.g. `SELECT ... FOR UPDATE`, `FOR UPDATE SKIP LOCKED`, `FOR SHARE`, `LOCK IN SHARE MODE`, `GET_LOCK(...)`) will always be sent to the primary
+* Locking reads (e.g. `SELECT ... FOR UPDATE`, `FOR UPDATE SKIP LOCKED`, `FOR SHARE`, `FOR NO KEY UPDATE`, `FOR KEY SHARE`, `LOCK IN SHARE MODE`) will always be sent to the primary
+* So will reads that call a locking or sequence function — `GET_LOCK(...)`, `IS_FREE_LOCK(...)`, `nextval(...)`, `setval(...)` and PostgreSQL's advisory lock family (`pg_advisory_lock`, `pg_try_advisory_xact_lock_shared`, `pg_advisory_unlock_all`, and so on)
+* PostgreSQL cursor statements (`DECLARE`, `FETCH`, `MOVE`, `CLOSE`) go to the primary, so a cursor is always fetched on the connection that declared it
 
 # Notes
 
