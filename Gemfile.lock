@@ -37,7 +37,7 @@ GEM
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     io-console (0.8.2)
-    json (3.0.2)
+    json (3.1.0)
     language_server-protocol (3.17.0.6)
     lint_roller (1.1.0)
     logger (1.7.0)
@@ -48,7 +48,7 @@ GEM
     mysql2 (0.5.7)
       bigdecimal
     parallel (1.28.0)
-    parser (3.3.12.0)
+    parser (3.3.13.0)
       ast (~> 2.4.1)
       racc
     pg (1.6.3-arm64-darwin)
@@ -59,10 +59,10 @@ GEM
       method_source (~> 1.0)
       reline (>= 0.6.0)
     racc (1.8.1)
-    rack (3.2.7)
+    rack (3.2.8)
     rainbow (3.1.1)
     rake (13.4.2)
-    regexp_parser (2.13.0)
+    regexp_parser (2.13.1)
     reline (0.6.3)
       io-console (~> 0.5)
     rspec (3.13.2)
@@ -96,7 +96,7 @@ GEM
       lint_roller (~> 1.1)
       rubocop (>= 1.89.0, < 2.0)
       rubocop-ast (>= 1.47.1, < 2.0)
-    rubocop-rails (2.37.0)
+    rubocop-rails (2.38.0)
       activesupport (>= 4.2.0)
       lint_roller (~> 1.1)
       rack (>= 1.1)
@@ -120,7 +120,7 @@ GEM
     unicode-display_width (3.3.0)
       unicode-emoji (~> 4.3)
     unicode-emoji (4.3.0)
-    uri (1.1.1)
+    uri (1.1.2)
 
 PLATFORMS
   arm64-darwin-23
@@ -136,7 +136,7 @@ DEPENDENCIES
   rspec (~> 3)
   rubocop (~> 1.91.0)
   rubocop-performance
-  rubocop-rails (~> 2.37.0)
+  rubocop-rails (~> 2.38.0)
   rubocop-rspec
   rubocop-thread_safety
   trilogy
