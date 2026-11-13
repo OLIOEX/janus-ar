@@ -4,7 +4,7 @@ module Janus
       MAJOR = 8
       MINOR = 1
       PATCH = 4
-      PRE = '1-1'
+      PRE = '1.2'
 
       def self.to_s
         [MAJOR, MINOR, PATCH, PRE].compact.join('.')
